@@ -87,27 +87,35 @@ class DeliveryPreviewDialog(QDialog):
         title.setObjectName("Title")
         layout.addWidget(title)
 
-        # Bagian atas: Placeholder Map (5 bagian)
+        # Bagian atas: Analisis Rute Pengantaran 
         self.map_box = QFrame()
         self.map_box.setObjectName("MapBox")
         map_layout = QVBoxLayout(self.map_box)
         map_layout.setContentsMargins(16, 16, 16, 16)
-        map_layout.setSpacing(8)
-        map_title = QLabel("Map Rute Pengiriman")
+        map_layout.setSpacing(10) # Sedikit perbesar jarak antar label
+
+        map_title = QLabel("Analisis Rute Pengantaran")
         map_title.setObjectName("SectionTitle")
-        map_desc = QLabel("Visualisasi rute akan ditampilkan di jendela terpisah saat Anda menekan tombol di bawah.")
-        map_desc.setStyleSheet("color:#5A8A9B;")
-        map_desc.setWordWrap(True)
         map_layout.addWidget(map_title)
-        map_layout.addWidget(map_desc)
-        # Label hasil perhitungan rute
-        self.lbl_distance = QLabel("Jarak tempuh: -")
-        self.lbl_timecalc = QLabel("Estimasi waktu (100 m/s): -")
-        self.lbl_distance.setStyleSheet("color:#2C5F6F;font-weight:600;")
-        self.lbl_timecalc.setStyleSheet("color:#2C5F6F;")
+
+        # Label untuk menampilkan Jarak Total
+        self.lbl_distance = QLabel("Jarak Tempuh Total: Menghitung...")
+        self.lbl_distance.setStyleSheet("color:#2C5F6F; font-weight:600; font-size: 13px;")
         map_layout.addWidget(self.lbl_distance)
-        map_layout.addWidget(self.lbl_timecalc)
-        map_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+
+        # Label untuk menampilkan Estimasi Waktu (berdasarkan 36 km/jam)
+        self.lbl_estimated_time = QLabel("Estimasi Waktu Tempuh: Menghitung...")
+        self.lbl_estimated_time.setStyleSheet("color:#3b6a75; font-size: 13px;")
+        map_layout.addWidget(self.lbl_estimated_time)
+        
+        # Label untuk narasi/analisis tambahan
+        self.lbl_analysis_text = QLabel("Analisis:\nMenunggu perhitungan rute...")
+        self.lbl_analysis_text.setStyleSheet("color:#5A8A9B; font-style: italic;")
+        self.lbl_analysis_text.setWordWrap(True)
+        map_layout.addWidget(self.lbl_analysis_text)
+
+        # Spacer agar konten tidak terlalu renggang jika rute pendek
+        map_layout.addStretch(1)
 
         # Bagian bawah: Info kiri + Rincian kanan (3 bagian tinggi)
         bottom = QHBoxLayout()
@@ -310,22 +318,54 @@ class DeliveryPreviewDialog(QDialog):
         self._load_graph_if_needed()
         if self.G is None or self.gdf_lokasi is None:
             QMessageBox.warning(self, "Gagal Memuat Peta", "Data peta atau GeoJSON tidak dapat dimuat.")
+            # Reset label jika gagal
+            self.lbl_distance.setText("Jarak Tempuh Total: Gagal memuat peta")
+            self.lbl_estimated_time.setText("Estimasi Waktu Tempuh: Gagal memuat peta")
+            self.lbl_analysis_text.setText("Analisis:\nTidak dapat menghitung rute karena data peta tidak tersedia.")
             return None, None, None
-        start_name = "Depot Air Pusat"
+            
+        start_name = "Depot Air Pusat" # Pastikan nama ini ADA di GeoJSON Anda
         dest_name = self._get_destination_name()
         if not dest_name:
-            QMessageBox.information(self, "Tujuan Tidak Ditemukan", "Alamat tujuan pembeli tidak tersedia.")
+            QMessageBox.information(self, "Tujuan Tidak Ditemukan", "Alamat tujuan (intersection_name) pembeli tidak tersedia atau tidak valid.")
+            self.lbl_distance.setText("Jarak Tempuh Total: Tujuan tidak valid")
+            self.lbl_estimated_time.setText("Estimasi Waktu Tempuh: Tujuan tidak valid")
+            self.lbl_analysis_text.setText("Analisis:\nTidak dapat menghitung rute karena nama tujuan tidak ditemukan di data lokasi.")
             return None, None, None
+
+        # Panggil fungsi Dijkstra dari path_finder
+        # Asumsi: cari_rute_by_nama mengembalikan (edges, length_km)
         edges, length_km = cari_rute_by_nama(self.G, self.gdf_lokasi, start_name, dest_name, show_preview=False)
+
         if not edges:
-            QMessageBox.information(self, "Rute Tidak Ditemukan", f"Tidak ada rute dari {start_name} ke {dest_name}.")
+            QMessageBox.information(self, "Rute Tidak Ditemukan", f"Tidak ada rute yang ditemukan dari '{start_name}' ke '{dest_name}'.\nMungkin jalan terputus atau lokasi tidak terjangkau.")
+            self.lbl_distance.setText(f"Jarak Tempuh Total: Rute ke '{dest_name}' tidak ditemukan")
+            self.lbl_estimated_time.setText("Estimasi Waktu Tempuh: Rute tidak ditemukan")
+            self.lbl_analysis_text.setText("Analisis:\nTidak ada jalur yang valid antara titik awal dan tujuan. Periksa apakah ada jalan yang terputus atau lokasi tujuan benar-benar terisolasi.")
             return None, None, None
-        # Rekonstruksi nodes dari edges
+
+        # --- Perhitungan dan Update UI ---
+        # Rekonstruksi nodes dari edges (diperlukan untuk timeline)
         path_nodes = [edges[0][0]] + [e[1] for e in edges]
-        # Update label jarak & estimasi waktu (100 m/s)
-        self.lbl_distance.setText(f"Jarak tempuh: {length_km:.2f} km")
-        seconds = (length_km * 1000.0) / 100.0
-        self.lbl_timecalc.setText(f"Estimasi waktu (100 m/s): {seconds:.1f} detik")
+
+        # Hitung estimasi waktu dalam menit (36 km/jam = 0.6 km/menit)
+        kecepatan_km_per_menit = 36 / 60
+        estimated_minutes = length_km / kecepatan_km_per_menit if kecepatan_km_per_menit > 0 else 0
+
+        # Update label di UI
+        self.lbl_distance.setText(f"Jarak Tempuh Total: {length_km:.2f} km")
+        self.lbl_estimated_time.setText(f"Estimasi Waktu Tempuh: {math.ceil(estimated_minutes)} menit (dengan asumsi 36 km/jam konstan)")
+
+        # Buat narasi analisis
+        analysis_str = (
+            f"Analisis:\n"
+            f"Rute terpendek dari '{start_name}' ke '{dest_name}' adalah {length_km:.2f} km. "
+            f"Dengan asumsi kecepatan rata-rata konstan 36 km/jam tanpa henti, perjalanan ini diperkirakan memakan waktu sekitar {math.ceil(estimated_minutes)} menit. "
+            f"Perlu diingat bahwa waktu tempuh aktual dapat bervariasi signifikan tergantung pada kondisi lalu lintas, waktu tunggu di lokasi, dan faktor eksternal lainnya. "
+            f"Gunakan visualisasi 'Rute Tercepat' (peta) dan 'Node' (timeline) untuk melihat detail perjalanan."
+        )
+        self.lbl_analysis_text.setText(analysis_str)
+
         return path_nodes, length_km, dest_name
 
     def _on_show_fastest_route(self):
