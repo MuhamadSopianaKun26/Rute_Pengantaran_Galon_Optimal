@@ -1,0 +1,82 @@
+[
+  {
+    "id": "ORD-002",
+    "customer_name": "Argii",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "menunggu",
+    "area": "sari rasa",
+    "street": "Jl. Sari Rasa 1",
+    "note": "12345",
+    "created_at": "2025-10-20T19:29:10.189631",
+    "user_name": "argi kimang",
+    "user_email": "argii@gmail.com"
+  },
+  {
+    "id": "ORD-005",
+    "customer_name": "Pian",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Ciwaruga3",
+    "note": "",
+    "created_at": "2025-10-21T11:18:59.886124",
+    "user_name": "argiansah pian",
+    "user_email": "pian@gmail.com"
+  },
+  {
+    "id": "ORD-006",
+    "customer_name": "GUest 2",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "dalam_perjalanan",
+    "area": "Sariasih",
+    "street": "Jalan Kampus Polban & Jalan Sariasih & Jalan Terusan Sari Asih & Jalan Villa Duta",
+    "note": "",
+    "created_at": "2025-10-21T16:14:30.587550",
+    "user_name": "Guest person",
+    "user_email": "guest@gmail.com"
+  },
+  {
+    "id": "ORD-007",
+    "customer_name": "Argii 2",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      },
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "menunggu",
+    "area": "Sariasih",
+    "street": "Jalan Sariasih & Jalan Terusan Sari Asih & Jalan Tirtasari",
+    "note": "",
+    "created_at": "2025-10-21T23:19:29.008407",
+    "user_name": "argi kimang",
+    "user_email": "argii@gmail.com"
+  }
+]

@@ -1,0 +1,233 @@
+[
+  {
+    "id": "HIST-1001",
+    "source_order": "ORD-010",
+    "customer_name": "Sinta",
+    "items": [
+      "Galon Aqua 19L"
+    ],
+    "finished_at": "2025-10-10 09:20",
+    "status": "selesai",
+    "created_at": "2025-10-20T20:14:56.954511",
+    "finalized_at": "2025-10-10 09:20"
+  },
+  {
+    "id": "HIST-1002",
+    "source_order": "ORD-011",
+    "customer_name": "Rudi",
+    "items": [
+      "Galon Aqua 19L",
+      "Tutup Galon"
+    ],
+    "canceled_at": "2025-10-11 12:05",
+    "status": "dibatalkan",
+    "note": "Dibatalkan oleh penjual",
+    "created_at": "2025-10-20T20:14:56.954511",
+    "finalized_at": "2025-10-11 12:05"
+  },
+  {
+    "id": "ORD-001",
+    "customer_name": "Argi",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      },
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "ditolak",
+    "area": "Ciwaruga",
+    "street": "Jl. Ciwaruga 1",
+    "note": "123",
+    "user_name": "argiansah pian",
+    "user_email": "pian@gmail.com",
+    "finalized_at": "2025-10-20T19:07:30.448616",
+    "created_at": "2025-10-20T20:14:56.954511"
+  },
+  {
+    "id": "ORD-003",
+    "customer_name": "Guest",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      },
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      },
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "dibatalkan",
+    "area": "Ciwaruga",
+    "street": "Jl. Ciwaruga 1",
+    "note": "",
+    "created_at": "2025-10-20T22:44:24.433145",
+    "user_name": "Guest person",
+    "user_email": "guest@gmail.com",
+    "canceled_at": "2025-10-20T22:58:35.041567",
+    "finalized_at": "2025-10-20T22:58:35.041567"
+  },
+  {
+    "id": "ORD-004",
+    "customer_name": "Guest",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "dibatalkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Kampus Polban7",
+    "note": "rumah warna kuning",
+    "created_at": "2025-10-21T01:58:58.852768",
+    "user_name": "Guest person",
+    "user_email": "guest@gmail.com",
+    "canceled_at": "2025-10-21T01:59:16.790190",
+    "finalized_at": "2025-10-21T01:59:16.790190"
+  },
+  {
+    "id": "ORD-004",
+    "customer_name": "Sopian",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "dibatalkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Ciwaruga1",
+    "note": "",
+    "created_at": "2025-10-21T09:43:10.191865",
+    "user_name": "argiansah pian",
+    "user_email": "pian@gmail.com",
+    "canceled_at": "2025-10-21T09:43:17.137083",
+    "finalized_at": "2025-10-21T09:43:17.137083"
+  },
+  {
+    "id": "ORD-005",
+    "customer_name": "guest",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "dibatalkan",
+    "area": "Ciwaruga",
+    "street": "Gang Sarimanis 6",
+    "note": "",
+    "created_at": "2025-10-21T10:31:55.882403",
+    "user_name": "Guest person",
+    "user_email": "guest@gmail.com",
+    "canceled_at": "2025-10-21T10:32:03.721563",
+    "finalized_at": "2025-10-21T10:32:03.721563"
+  },
+  {
+    "id": "ORD-001",
+    "customer_name": "Pian",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      },
+      {
+        "name": "Air Mineral 600ml (6 pcs)",
+        "qty": 1
+      }
+    ],
+    "eta": "12.00",
+    "schedule": "12.00",
+    "status": "selesai",
+    "area": "Ciwaruga",
+    "street": "Jl. Ciwaruga 2",
+    "note": "",
+    "created_at": "2025-10-20T19:28:04.921451",
+    "user_name": "argiansah pian",
+    "user_email": "pian@gmail.com",
+    "finalized_at": "2025-10-21T10:40:30.400453"
+  },
+  {
+    "id": "ORD-005",
+    "customer_name": "Pian",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      },
+      {
+        "name": "Air Mineral 1.5L (6 pcs)",
+        "qty": 1
+      }
+    ],
+    "eta": "09.00",
+    "schedule": "09.00",
+    "status": "dibatalkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Kampus Polban9",
+    "note": "",
+    "created_at": "2025-10-21T10:41:50.440209",
+    "user_name": "argiansah pian",
+    "user_email": "pian@gmail.com",
+    "canceled_at": "2025-10-21T11:18:18.914926",
+    "finalized_at": "2025-10-21T11:18:18.914926"
+  },
+  {
+    "id": "ORD-004",
+    "customer_name": "guest",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "selesai",
+    "area": "Ciwaruga",
+    "street": "Gang Sarimanis 6",
+    "note": "",
+    "created_at": "2025-10-21T10:31:33.243126",
+    "user_name": "Guest person",
+    "user_email": "guest@gmail.com",
+    "finalized_at": "2025-10-21T16:10:51.635664"
+  },
+  {
+    "id": "ORD-003",
+    "customer_name": "guest",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "selesai",
+    "area": "Ciwaruga",
+    "street": "Jl. Ciwaruga 1",
+    "note": "",
+    "created_at": "2025-10-20T23:04:54.585976",
+    "user_name": "Guest person",
+    "user_email": "guest@gmail.com",
+    "finalized_at": "2025-10-21T16:14:41.154359"
+  }
+]

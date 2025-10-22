@@ -1,0 +1,8 @@
+{
+  "products": [
+    { "name": "Galon Aqua 19L", "price": 20000 },
+    { "name": "Tutup Galon", "price": 2000 },
+    { "name": "Air Mineral 600ml (6 pcs)", "price": 25000 },
+    { "name": "Air Mineral 1.5L (6 pcs)", "price": 48000 }
+  ]
+}
