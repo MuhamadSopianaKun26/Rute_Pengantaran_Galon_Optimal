@@ -421,6 +421,7 @@ class SellerMainWindow(QMainWindow):
         self.username = username
         self.current_user = current_user or {}
         self.sidebar_visible = False
+        self.marker_delete = []
         self.init_ui()
         self.setup_animations()
     

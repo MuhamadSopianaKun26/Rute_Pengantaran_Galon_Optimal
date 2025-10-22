@@ -107,7 +107,6 @@ class AppController(QMainWindow):
             
             # Connect signals
             self.customer_dashboard.logout_requested.connect(self.on_customer_logout)
-            self.customer_dashboard.simulation_requested.connect(self.on_simulation_request)
             
             # Hide main window and show customer dashboard
             self.hide()
@@ -188,7 +187,6 @@ class AppController(QMainWindow):
             info_label.setStyleSheet("color: #5A8A9B; margin-bottom: 30px;")
             layout.addWidget(welcome_label)
             layout.addWidget(info_label)
-            layout.addWidget(test_graph_btn, alignment=Qt.AlignmentFlag.AlignCenter)
             layout.addStretch()
             self.setCentralWidget(central_widget)
     
