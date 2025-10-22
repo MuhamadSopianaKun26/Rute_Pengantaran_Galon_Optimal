@@ -1,8 +1,17 @@
 {
   "products": [
-    { "name": "Galon Aqua 19L", "price": 20000 },
+    { "name": "Galon Aqua 19L Original", "price": 25000 },
+    { "name": "Galon Aqua 19L Refil", "price": 10000 },
+    { "name": "Galon Le-Mineral 19L", "price": 23000 },
+    { "name": "Galon Cleo 19L", "price": 20000 },
+    { "name": "Galon Ades 19L", "price": 21000 },
+
+    { "name": "Air Mineral 600ml (12 pcs)", "price": 35000 },
+    { "name": "Air Mineral 1.5L (6 pcs)", "price": 35000 },
+    { "name": "Air Mineral gelas (1 dus)", "price": 23000 },
+
+
     { "name": "Tutup Galon", "price": 2000 },
-    { "name": "Air Mineral 600ml (6 pcs)", "price": 25000 },
-    { "name": "Air Mineral 1.5L (6 pcs)", "price": 48000 }
+    { "name": "Tisu Galon 5pcs", "price": 2000 }
   ]
 }

@@ -139,7 +139,7 @@ class HeaderBar(QWidget):
             QPushButton {
                 background-color: rgba(255, 255, 255, 0.15);
                 color: black;
-                font-size: 18px;
+                font-size: 22px;
                 font-weight: bold;
                 border: none;
                 border-radius: 8px;

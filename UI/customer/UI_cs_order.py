@@ -79,7 +79,7 @@ def _load_areas_from_json() -> dict:
 def _load_area_streets_from_geojson() -> dict:
     """Muat mapping region -> [intersection_name] dari file GeoJSON.
     Fallback ke data JSON lama atau konstanta jika gagal."""
-    path = _graph_path('intersections_area.geojson')
+    path = _graph_path('output.geojson')
     try:
         with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
