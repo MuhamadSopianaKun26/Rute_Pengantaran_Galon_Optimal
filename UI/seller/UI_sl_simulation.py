@@ -106,7 +106,7 @@ class SellerSimulation(QWidget):
         project_root = self.get_project_root()
         
         try:
-            area_path = os.path.join(project_root, "logic", "graph", "intersections_area.geojson")
+            area_path = os.path.join(project_root, "logic", "graph", "output.geojson")
             if os.path.exists(area_path):
                 with open(area_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
