@@ -147,7 +147,129 @@
 <script>
 
     let editedMarkers = [];
-        var markerList = [];
+    var markerList = [];
+
+    function cutLayersByCoord(payload) {
+
+        console.log("Menerima perintah Cut berdasarkan koordinat:", payload);
+
+        const markerLat = payload.marker_coords[0];
+        const markerLon = payload.marker_coords[1];
+        const nodeLon = payload.node_coords[0];
+        const nodeLat = payload.node_coords[1];
+
+        // Ganti ini dengan nama variabel peta Anda yang benar
+        const map_var = map_4325a5f18c9e89067a7ebd47c8b97130; 
+        const tolerance = 0.000001; // Toleransi untuk perbandingan float
+        
+        let layersToDelete = [];
+
+        // Pindai SEMUA layer di peta
+        map_var.eachLayer(function(layer) {
+
+            // --- Cek 1: Apakah layer ini MARKER yang cocok? ---
+            if (layer instanceof L.CircleMarker || layer instanceof L.Marker) {
+                const m_lat = layer.getLatLng().lat;
+                const m_lon = layer.getLatLng().lng;
+
+                if (Math.abs(m_lat - markerLat) < tolerance && Math.abs(m_lon - markerLon) < tolerance) {
+                    layersToDelete.push(layer);
+                    console.log("Menandai MARKER untuk dihapus.");
+                }
+            }
+
+            // --- Cek 2: Apakah layer ini EDGE (GeoJSON LineString) yang terhubung? ---
+            if (layer.feature && layer.feature.geometry && layer.feature.geometry.type === 'LineString') {
+                const coords = layer.feature.geometry.coordinates;
+                if (!coords || coords.length < 2) return; // Skip jika tidak valid
+
+                // Ambil titik awal [lon, lat]
+                const start_lon = coords[0][0];
+                const start_lat = coords[0][1];
+
+                // Ambil titik akhir [lon, lat]
+                const end_lon = coords[coords.length - 1][0];
+                const end_lat = coords[coords.length - 1][1];
+
+                // Cek titik awal
+                const start_matches = (Math.abs(start_lon - nodeLon) < tolerance && 
+                                       Math.abs(start_lat - nodeLat) < tolerance);
+                                     
+                // Cek titik akhir
+                const end_matches = (Math.abs(end_lon - nodeLon) < tolerance && 
+                                     Math.abs(end_lat - nodeLat) < tolerance);
+
+                if (start_matches || end_matches) {
+                    layersToDelete.push(layer);
+                    console.log("Menandai EDGE untuk dihapus.");
+                }
+            }
+        });
+
+        // --- Hapus semua layer yang ditandai ---
+        if (layersToDelete.length > 0) {
+            console.log(`Menghapus ${layersToDelete.length} layer...`);
+            layersToDelete.forEach(layer => {
+                map_var.removeLayer(layer);
+                
+                // Hapus dari array internal juga (jika ada)
+                let markerIndex = markerList.indexOf(layer);
+                if (markerIndex > -1) markerList.splice(markerIndex, 1);
+                
+                let edgeIndex = (typeof edgeList !== 'undefined') ? edgeList.indexOf(layer) : -1;
+                if (edgeIndex > -1) edgeList.splice(edgeIndex, 1);
+            });
+        } else {
+            console.warn("Tidak ada layer yang cocok ditemukan untuk dihapus.");
+        }
+    }
+    
+    // --- TAMBAHKAN FUNGSI BARU INI ---
+    function removeMarkerByCoords(lat, lon) {
+        console.log(`Menerima perintah untuk menghapus marker di: Lat=${lat}, Lon=${lon}`);
+        
+        // Toleransi presisi. Angka di Python dan JS bisa berbeda sangat tipis.
+        const tolerance = 0.000001; 
+        
+        let markerToDelete = null;
+
+        // --- PERUBAHAN UTAMA: Pindai SEMUA layer di peta ---
+        // Ganti 'map_4325a5f18c9e89067a7ebd47c8b97130' 
+        // dengan nama variabel peta Anda yang benar jika berbeda.
+        map_4325a5f18c9e89067a7ebd47c8b97130.eachLayer(function(layer) {
+            
+            // Cek apakah layer ini adalah marker (CircleMarker atau Marker biasa)
+            if (layer instanceof L.CircleMarker || layer instanceof L.Marker) {
+                
+                const markerLat = layer.getLatLng().lat;
+                const markerLng = layer.getLatLng().lng;
+
+                // Cek apakah koordinatnya cocok dalam batas toleransi
+                if (Math.abs(markerLat - lat) < tolerance && Math.abs(markerLng - lon) < tolerance) {
+                    markerToDelete = layer;
+                    // Log ini untuk konfirmasi internal
+                    console.log("Marker ditemukan!", layer);
+                }
+            }
+        });
+        // --- SELESAI PERUBAHAN ---
+
+        if (markerToDelete) {
+            console.log("Menghapus marker dari peta.");
+            
+            // Hapus layer marker dari peta
+            map_4325a5f18c9e89067a7ebd47c8b97130.removeLayer(markerToDelete);
+            
+            // Opsional: Hapus juga dari markerList jika ada
+            const index = markerList.indexOf(markerToDelete);
+            if (index > -1) {
+                markerList.splice(index, 1);
+            }
+        } else {
+            // Ini pesan error yang Anda lihat sebelumnya
+            console.warn(`Marker dengan koordinat ${lat}, ${lon} tidak ditemukan di peta.`);
+        }
+    }
 
 function aktifkanInteraksiSemuaMarker() {
     map_4325a5f18c9e89067a7ebd47c8b97130.eachLayer(function(layer) {

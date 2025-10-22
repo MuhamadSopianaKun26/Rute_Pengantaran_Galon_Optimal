@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # BAGIAN SETUP AWAL (Cukup dijalankan sekali saat aplikasi pertama kali start)
 # =============================================================================
 
-def muat_data_peta_dan_lokasi(point, distance=1000, network_type="drive", path_ke_geojson="intersections_area.geojson"):
+def muat_data_peta_dan_lokasi(point, distance=1000, network_type="drive", path_ke_geojson="intersections_named_final.geojson"):
     """
     Memuat graf peta dari OSMnx DAN data lokasi penting dari file GeoJSON.
     """
@@ -147,66 +147,78 @@ def cari_rute_by_nama(G, gdf_lokasi, nama_awal, nama_akhir, show_preview: bool =
 # BAGIAN KONFIRMASI DJIKSTRA SAAT MENGEKSEKUSI PEMESANAN
 # =============================================================================
 
-def buat_visualisasi_timeline_dijkstra(gdf_lokasi, path_nodes):
+def buat_visualisasi_timeline_dijkstra(G_peta, gdf_lokasi, path_nodes):
     """
     Membuat visualisasi rute Dijkstra dalam bentuk timeline zig-zag yang fleksibel.
+    SEKARANG DENGAN LABEL BOBOT (JARAK) PADA SETIAP SISI.
     
     Args:
+        G_peta (nx.Graph): Objek graf peta ASLI dari OSMnx, berisi data bobot.
         gdf_lokasi (gpd.GeoDataFrame): Tabel data lokasi dari GeoJSON.
         path_nodes (list): Daftar ID simpul dari rute Dijkstra.
     """
     print("Membuat visualisasi timeline rute yang fleksibel...")
     
-    # --- Langkah 1: Siapkan Informasi Label ---
+    # --- Langkah 1: Siapkan Informasi Label Simpul ---
     nama_simpul_map = gdf_lokasi.set_index('osmid')['intersection_name'].to_dict()
-    labels = {}
+    node_labels = {}
     for node_id in path_nodes:
         nama = nama_simpul_map.get(node_id, str(node_id))
-        labels[node_id] = textwrap.fill(nama, width=20) # Lebarkan sedikit untuk nama jalan
+        node_labels[node_id] = textwrap.fill(nama, width=20)
 
     # --- Langkah 2: Buat Layout Zig-Zag ---
     pos = {}
-    nodes_per_row = 5  # Jumlah simpul per baris sebelum "turun"
+    # (Logika layout zig-zag tetap sama)
+    nodes_per_row = 5
     x, y = 0, 0
-    direction = 1  # 1 untuk ke kanan, -1 untuk ke kiri
+    direction = 1
     for i, node_id in enumerate(path_nodes):
         pos[node_id] = (x, y)
         if (i + 1) % nodes_per_row == 0 and i < len(path_nodes) - 1:
-            y -= 2  # Turun ke baris berikutnya (beri jarak lebih)
-            direction *= -1  # Balikkan arah
+            y -= 2
+            direction *= -1
         else:
-            x += direction  # Bergerak ke arah saat ini
+            x += direction
 
-    # --- Langkah 3: Buat Graf Rute dan Gambar ---
+    # --- (BARU) Langkah 3: Siapkan Label Bobot Sisi ---
+    edge_labels = {}
+    for i in range(len(path_nodes) - 1):
+        u, v = path_nodes[i], path_nodes[i+1]
+        # Ambil data sisi dari graf peta ASLI (G_peta)
+        panjang_meter = G_peta.get_edge_data(u, v)[0]['length']
+        # Format ke km dengan 2 angka desimal
+        panjang_km = f"{panjang_meter / 1000:.2f} km"
+        edge_labels[(u, v)] = panjang_km
+
+    # --- Langkah 4: Buat Graf Rute dan Gambar ---
     G_rute = nx.path_graph(path_nodes)
     
-    # Sesuaikan ukuran kanvas secara dinamis
     num_rows = (len(path_nodes) - 1) // nodes_per_row + 1
     fig, ax = plt.subplots(figsize=(12, num_rows * 3))
 
-    # Gambar simpul dengan ukuran lebih kecil
-    nx.draw_networkx_nodes(
-        G_rute, pos, ax=ax,
-        node_color='skyblue', node_size=500,  # Ukuran node dikecilkan
-        edgecolors='black', linewidths=1.0
-    )
+    # Gambar simpul
+    nx.draw_networkx_nodes(G_rute, pos, ax=ax, node_color='skyblue', node_size=1500)
     
     # Gambar sisi
-    nx.draw_networkx_edges(
-        G_rute, pos, ax=ax,
-        width=2.0, edge_color='black',
-        arrows=True, arrowsize=20, arrowstyle='-|>'
+    nx.draw_networkx_edges(G_rute, pos, ax=ax, width=2.0, edge_color='black', arrows=True, arrowsize=20, arrowstyle='-|>')
+    
+    # (BARU) Gambar label bobot pada sisi
+    nx.draw_networkx_edge_labels(
+        G_rute, pos,
+        edge_labels=edge_labels,
+        font_color='red',
+        font_size=8,
+        ax=ax
     )
     
-    # Gambar label (nomor urut DAN nama persimpangan) di bawah simpul
+    # Gambar label nama di bawah simpul
     for i, node_id in enumerate(path_nodes):
         x_coord, y_coord = pos[node_id]
-        label_text = f"{i+1}\n{labels[node_id]}"
-        ax.text(x_coord, y_coord - 0.5, label_text, ha='center', va='top', fontsize=5,
-                bbox=dict(facecolor='white', alpha=0.5, edgecolor='none', boxstyle='round,pad=0.2'))
+        label_text = f"{i+1}\n{node_labels[node_id]}"
+        ax.text(x_coord, y_coord - 0.5, label_text, ha='center', va='top', fontsize=8)
 
     ax.axis('off')
-    plt.title("Konfirmasi Rute Pengantaran (Timeline Perjalanan)", fontsize=16)
+    ax.set_title("Konfirmasi Rute Pengantaran (Timeline Perjalanan)", fontsize=16, pad=20)
     plt.tight_layout()
     plt.show()
 
@@ -321,4 +333,4 @@ if __name__ == "__main__":
                 reconstructed_path_nodes = [hasil_sisi[0][0]] + [edge[1] for edge in hasil_sisi]
                 
                 # Panggil fungsi visualisasi timeline dengan data yang sudah direkonstruksi
-                buat_visualisasi_timeline_dijkstra(lokasi_penting, reconstructed_path_nodes)
+                buat_visualisasi_timeline_dijkstra(graf_peta, lokasi_penting, reconstructed_path_nodes)

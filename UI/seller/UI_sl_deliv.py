@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QFrame,
     QListWidget, QListWidgetItem, QPushButton, QSpacerItem, QSizePolicy, QMessageBox, QScrollArea
 )
+import textwrap
 import os, json, datetime
 import math
 import networkx as nx
@@ -10,7 +11,6 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import geopandas as gpd
 import osmnx as ox
-import textwrap
 from logic.graph.path_finder import muat_data_peta_dan_lokasi, cari_rute_by_nama
 
 
@@ -48,10 +48,11 @@ class DeliveryPreviewDialog(QDialog):
     - Bawah: Tombol Kembali dan Kirim Sekarang
     """
 
-    def __init__(self, order: dict, parent=None):
+    def __init__(self, order: dict, parent=None, marker_deleted=None):
         super().__init__(parent)
         self.order = order or {}
         self._price_map = _load_products_price_map()
+        self.marker_deleted=marker_deleted
 
         self.setWindowTitle("Preview Pengiriman")
         self.resize(1000, 720)
@@ -220,6 +221,7 @@ class DeliveryPreviewDialog(QDialog):
         self.lbl_total.setText(f"Total Harga: Rp{total:,}")
 
     def _estimate_duration_minutes(self) -> int:
+        # Placeholder estimasi: 15 menit dasar + 2 menit per item
         try:
             count = sum(int(it.get('qty', 1) or 1) for it in (self.order.get('items') or []))
         except Exception:
@@ -269,7 +271,29 @@ class DeliveryPreviewDialog(QDialog):
                 self.G, self.gdf_lokasi = None, None
                 return
             G, gdf = muat_data_peta_dan_lokasi(lokasi_peta, path_ke_geojson=path_geojson)
+
+            osmid_to_remove = gdf[gdf["intersection_name"].isin(self.marker_deleted)]["osmid"].tolist()
+            print("OSMID yang akan dihapus:", osmid_to_remove)
+
+            gdf = gdf[~gdf["intersection_name"].isin(self.marker_deleted)]
+
             self.G, self.gdf_lokasi = G, gdf
+
+            self.G.remove_nodes_from(osmid_to_remove)
+
+            # Hapus node-node tersebut dari graph
+            self.G.remove_nodes_from(osmid_to_remove)
+            print("Nodes to remove:", osmid_to_remove)
+            print("Node count sebelum hapus:", self.G.number_of_nodes())
+            self.G.remove_nodes_from(osmid_to_remove)
+            print("Node count setelah hapus:", self.G.number_of_nodes())
+
+            print("Contoh node dan atribut di G:")
+            for n, attr in list(self.G.nodes(data=True))[:10]:
+                print(n, attr)
+
+
+            
         except Exception as e:
             print(f"[ERROR] _load_graph_if_needed: {e}")
             print(f"[DEBUG] path_geojson={path_geojson}")
@@ -479,11 +503,11 @@ class RoutePreviewDialog(QDialog):
 
 
 class NodeTimelineDialog(QDialog):
-    def __init__(self, gdf_lokasi: gpd.GeoDataFrame, G: nx.Graph, path_nodes: list, title: str = "Timeline Dijkstra", parent=None):
+    def __init__(self, gdf_lokasi: gpd.GeoDataFrame, G, path_nodes: list, title: str = "Timeline Dijkstra", parent=None):
         super().__init__(parent)
         self.gdf_lokasi = gdf_lokasi
-        self.G = G
         self.path_nodes = path_nodes
+        self.G = G
         self.setWindowTitle("Timeline Dijkstra")
         self.resize(900, 650)
         layout = QVBoxLayout(self)
@@ -575,4 +599,3 @@ class NodeTimelineDialog(QDialog):
         # Update layout dan render canvas, jangan pakai plt.show()
         self.fig.tight_layout()
         self.canvas.draw()
-
