@@ -1,0 +1,22 @@
+[
+  {
+    "id": "ORD-004",
+    "customer_name": "guest",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "selesai",
+    "area": "Ciwaruga",
+    "street": "Gang Sarimanis 6",
+    "note": "",
+    "created_at": "2025-10-21T10:31:33.243126",
+    "user_name": "Guest person",
+    "user_email": "guest@gmail.com",
+    "finalized_at": "2025-10-21T16:10:51.635664"
+  }
+]
