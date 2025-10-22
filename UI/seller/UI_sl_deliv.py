@@ -241,15 +241,22 @@ class DeliveryPreviewDialog(QDialog):
             waktu_kirim_dt = datetime.datetime.now()
         jumlah_tikungan = len(edges) if edges else 0
 
-        total_detik = self.hitung_simulasi_kecepatan(float(length_km), waktu_kirim_dt, jumlah_tikungan)
-        self.waktu_tempuh_detik = int(round(total_detik))
-        menit = self.waktu_tempuh_detik // 60
-        detik = self.waktu_tempuh_detik % 60
-        # Pertahankan kompatibilitas: variabel menit yang dipakai bagian lain
-        self.waktu_tempuh = menit
-        self.lbl_eta_duration.setText(f"Estimasi Waktu Pengiriman: {menit} menit {detik} detik")
-        arrival_str = self._estimate_arrival_hhmm(self.waktu_tempuh)
-        self.lbl_eta_arrival.setText(f"Estimasi Sampai: {arrival_str}")
+        if not edges or not length_km:
+            # Tidak ada jalur yang ditemukan
+            self.waktu_tempuh_detik = None
+            self.waktu_tempuh = None
+            self.lbl_eta_duration.setText("Estimasi Waktu Pengiriman: Tidak ada jalur yang ditemukan")
+            self.lbl_eta_arrival.setText("Estimasi Sampai: -")
+        else:
+            total_detik = self.hitung_simulasi_kecepatan(float(length_km), waktu_kirim_dt, jumlah_tikungan)
+            self.waktu_tempuh_detik = int(round(total_detik))
+            menit = self.waktu_tempuh_detik // 60
+            detik = self.waktu_tempuh_detik % 60
+            # Pertahankan kompatibilitas: variabel menit yang dipakai bagian lain
+            self.waktu_tempuh = menit
+            self.lbl_eta_duration.setText(f"Estimasi Waktu Pengiriman: {menit} menit {detik} detik")
+            arrival_str = self._estimate_arrival_hhmm(self.waktu_tempuh)
+            self.lbl_eta_arrival.setText(f"Estimasi Sampai: {arrival_str}")
 
         # Rincian item & total
         total = 0
