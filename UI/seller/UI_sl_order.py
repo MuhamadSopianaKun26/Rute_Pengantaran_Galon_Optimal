@@ -64,10 +64,16 @@ def _append_json_list(file_path: str, record: dict) -> bool:
 class OrderCard(QFrame):
     """Widget kartu pesanan satu baris."""
 
+<<<<<<< HEAD
     def __init__(self, order: dict, parent=None, marker_deleted=None):
         super().__init__(parent)
         self.order = order
         self.marker_deleted = marker_deleted
+=======
+    def __init__(self, order: dict, parent=None):
+        super().__init__(parent)
+        self.order = order
+>>>>>>> 9fa41ba0365ca20000a189fc4bca587e6d6c3f2e
         self.setObjectName("OrderCard")
         self.setFrameShape(QFrame.Shape.NoFrame)
         self._build_ui()
@@ -187,7 +193,11 @@ class OrderCard(QFrame):
         """Set status menjadi 'dalam_perjalanan' (dalam pengantaran)."""
         # Tampilkan dialog preview terlebih dahulu
         try:
+<<<<<<< HEAD
             dlg = DeliveryPreviewDialog(self.order, marker_deleted=self.marker_deleted, parent=self)
+=======
+            dlg = DeliveryPreviewDialog(self.order, parent=self)
+>>>>>>> 9fa41ba0365ca20000a189fc4bca587e6d6c3f2e
             res = dlg.exec()
             if res == QDialog.DialogCode.Accepted:
                 self._update_order_status("dalam_perjalanan")
@@ -353,11 +363,18 @@ class OrderCard(QFrame):
 class SellerDeliveryPage(QWidget):
     """Halaman Pengantaran seller: menampilkan list kartu pesanan terpilih."""
 
+<<<<<<< HEAD
     def __init__(self, parent=None, current_user: dict | None = None, marker_deleted=None):
         super().__init__(parent)
         self._orders = []
         self.current_user = current_user or {}
         self.marker_deleted=marker_deleted
+=======
+    def __init__(self, parent=None, current_user: dict | None = None):
+        super().__init__(parent)
+        self._orders = []
+        self.current_user = current_user or {}
+>>>>>>> 9fa41ba0365ca20000a189fc4bca587e6d6c3f2e
         self._build_ui()
         self.reload_orders()
 
@@ -405,7 +422,11 @@ class SellerDeliveryPage(QWidget):
 
         # Tambah kartu untuk tiap order
         for order in self._orders:
+<<<<<<< HEAD
             self.container_layout.addWidget(OrderCard(order, marker_deleted=self.marker_deleted))
+=======
+            self.container_layout.addWidget(OrderCard(order))
+>>>>>>> 9fa41ba0365ca20000a189fc4bca587e6d6c3f2e
 
         # Tambah spacer agar list tidak terlalu rapat bawah
         self.container_layout.addStretch(1)
