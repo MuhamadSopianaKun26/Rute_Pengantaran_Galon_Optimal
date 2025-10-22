@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import geopandas as gpd
 import osmnx as ox
+import textwrap
 from logic.graph.path_finder import muat_data_peta_dan_lokasi, cari_rute_by_nama
 
 
@@ -321,7 +322,7 @@ class DeliveryPreviewDialog(QDialog):
         path_nodes, _, dest_name = self._compute_route()
         if not path_nodes:
             return
-        dlg = NodeTimelineDialog(self.gdf_lokasi, path_nodes, title=f"Timeline Dijkstra: Depot Air Pusat → {dest_name}")
+        dlg = NodeTimelineDialog(self.gdf_lokasi, self.G, path_nodes, title=f"Timeline Dijkstra: Depot Air Pusat → {dest_name}")
         dlg.exec()
 
 
@@ -478,9 +479,10 @@ class RoutePreviewDialog(QDialog):
 
 
 class NodeTimelineDialog(QDialog):
-    def __init__(self, gdf_lokasi: gpd.GeoDataFrame, path_nodes: list, title: str = "Timeline Dijkstra", parent=None):
+    def __init__(self, gdf_lokasi: gpd.GeoDataFrame, G: nx.Graph, path_nodes: list, title: str = "Timeline Dijkstra", parent=None):
         super().__init__(parent)
         self.gdf_lokasi = gdf_lokasi
+        self.G = G
         self.path_nodes = path_nodes
         self.setWindowTitle("Timeline Dijkstra")
         self.resize(900, 650)
@@ -509,14 +511,19 @@ class NodeTimelineDialog(QDialog):
         self._draw_timeline()
 
     def _draw_timeline(self):
+        # Bersihkan axes yang sudah ada
         self.ax.clear()
-        # Adopsi logika dari buat_visualisasi_timeline_dijkstra()
+
+        print("Membuat visualisasi timeline rute yang fleksibel...")
+
+        # --- Langkah 1: Siapkan Informasi Label Simpul ---
         nama_simpul_map = self.gdf_lokasi.set_index('osmid')['intersection_name'].to_dict()
-        labels = {}
+        node_labels = {}
         for node_id in self.path_nodes:
             nama = nama_simpul_map.get(node_id, str(node_id))
-            labels[node_id] = nama
+            node_labels[node_id] = textwrap.fill(nama, width=20)
 
+        # --- Langkah 2: Buat Layout Zig-Zag ---
         pos = {}
         nodes_per_row = 5
         x, y = 0, 0
@@ -529,28 +536,43 @@ class NodeTimelineDialog(QDialog):
             else:
                 x += direction
 
-        g_rute = nx.path_graph(self.path_nodes)
-        num_rows = (len(self.path_nodes) - 1) // nodes_per_row + 1
-        self.fig.set_size_inches(12, max(3, num_rows * 3))
+        # --- Langkah 3: Siapkan Label Bobot Sisi ---
+        edge_labels = {}
+        for i in range(len(self.path_nodes) - 1):
+            u, v = self.path_nodes[i], self.path_nodes[i+1]
+            # Ambil data sisi dari graf peta ASLI (G_peta)
+            panjang_meter = self.G.get_edge_data(u, v)[0]['length']
+            panjang_km = f"{panjang_meter / 1000:.2f} km"
+            edge_labels[(u, v)] = panjang_km
 
-        nx.draw_networkx_nodes(
-            g_rute, pos, ax=self.ax,
-            node_color='skyblue', node_size=500,
-            edgecolors='black', linewidths=1.0
+        # --- Langkah 4: Buat Graf Rute dan Gambar ---
+        G_rute = nx.path_graph(self.path_nodes)
+        
+        # Gambar simpul
+        nx.draw_networkx_nodes(G_rute, pos, ax=self.ax, node_color='skyblue', node_size=500)
+        
+        # Gambar sisi
+        nx.draw_networkx_edges(G_rute, pos, ax=self.ax, width=2.0, edge_color='black', arrows=True, arrowsize=20, arrowstyle='-|>')
+        
+        # Gambar label bobot pada sisi
+        nx.draw_networkx_edge_labels(
+            G_rute, pos,
+            edge_labels=edge_labels,
+            font_color='red',
+            font_size=8,
+            ax=self.ax
         )
-        nx.draw_networkx_edges(
-            g_rute, pos, ax=self.ax,
-            width=2.0, edge_color='black',
-            arrows=True, arrowsize=20, arrowstyle='-|>'
-        )
+        
+        # Gambar label nama di bawah simpul
         for i, node_id in enumerate(self.path_nodes):
             x_coord, y_coord = pos[node_id]
-            label_text = f"{i+1}\n{labels[node_id]}"
-            self.ax.text(x_coord, y_coord - 0.5, label_text, ha='center', va='top', fontsize=7,
-                         bbox=dict(facecolor='white', alpha=0.5, edgecolor='none', boxstyle='round,pad=0.2'))
+            label_text = f"{i+1}\n{node_labels[node_id]}"
+            self.ax.text(x_coord, y_coord - 0.5, label_text, ha='center', va='top', fontsize=8)
 
         self.ax.axis('off')
-        self.ax.set_title("Konfirmasi Rute Pengantaran (Timeline Perjalanan)")
+        self.ax.set_title("Konfirmasi Rute Pengantaran (Timeline Perjalanan)", fontsize=16, pad=20)
+        
+        # Update layout dan render canvas, jangan pakai plt.show()
         self.fig.tight_layout()
         self.canvas.draw()
 
