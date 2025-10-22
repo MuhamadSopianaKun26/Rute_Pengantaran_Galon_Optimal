@@ -1,3 +1,4 @@
+
 """
 AquaGalon - Sistem Pemesanan & Pengiriman Galon
 Berbasis Graph Theory untuk Matematika Diskrit
@@ -8,15 +9,15 @@ Main entry point untuk aplikasi
 import sys
 import os
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox
-from PyQt6.QtCore import Qt, pyqtSignal, QTimer
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer, QCoreApplication
 from PyQt6.QtGui import QFont, QIcon
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 
 # Add UI path to sys.path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'UI'))
 
 # Import components
 from UI.login.UI_login import create_login_system
-from graph_algorithms import create_graph_system
 
 
 class AppController(QMainWindow):
@@ -43,8 +44,6 @@ class AppController(QMainWindow):
         # Set application icon (jika ada)
         # self.setWindowIcon(QIcon("assets/icon.png"))
         
-        # Initialize graph system
-        self.graph_system, self.graph_visualizer = create_graph_system()
         
         # Show splash screen atau langsung ke login
         self.show_login()
@@ -158,22 +157,6 @@ class AppController(QMainWindow):
         # Show login again
         self.show_login()
     
-    def on_simulation_request(self):
-        """Handle simulation request dari customer dashboard"""
-        print("Simulation requested from customer dashboard")
-        
-        # TODO: Implementasi simulasi graph theory
-        # Untuk sementara tampilkan message box
-        from PyQt6.QtWidgets import QMessageBox
-        QMessageBox.information(
-            self.customer_dashboard if hasattr(self, 'customer_dashboard') else self,
-            "Simulasi",
-            "Fitur simulasi graph theory akan segera hadir!\n\n"
-            "Simulasi akan menampilkan:\n"
-            "- Visualisasi rute pengiriman\n"
-            "- Optimasi jalur terpendek\n"
-            "- Analisis efisiensi pengiriman"
-        )
         
     def setup_seller_interface(self):
         """Setup interface untuk seller"""
@@ -188,6 +171,8 @@ class AppController(QMainWindow):
             # Sembunyikan main window dan tampilkan dashboard seller
             self.hide()
             self.seller_dashboard.show()
+
+        # JIKA GAGAL IMPORT, TAMPILKAN INTERFACE SEDERHANA DENGAN TEST GRAPH
         except ImportError as e:
             print(f"Error importing seller dashboard: {e}")
             # Fallback sederhana (tetap sediakan test graph)
@@ -202,37 +187,11 @@ class AppController(QMainWindow):
             info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             info_label.setFont(QFont("Segoe UI", 14))
             info_label.setStyleSheet("color: #5A8A9B; margin-bottom: 30px;")
-            test_graph_btn = QPushButton("Test Graph Visualization")
-            test_graph_btn.clicked.connect(self.test_graph_visualization)
             layout.addWidget(welcome_label)
             layout.addWidget(info_label)
             layout.addWidget(test_graph_btn, alignment=Qt.AlignmentFlag.AlignCenter)
             layout.addStretch()
             self.setCentralWidget(central_widget)
-        
-    def test_graph_visualization(self):
-        """Test graph visualization"""
-        try:
-            # Get route info untuk test
-            route_info = self.graph_system.get_delivery_route("Jln. Kampus Polban")
-            
-            # Create visualization
-            canvas = self.graph_visualizer.create_route_visualization(route_info)
-            
-            # Show dalam dialog atau window baru
-            from PyQt6.QtWidgets import QDialog, QVBoxLayout
-            
-            dialog = QDialog(self)
-            dialog.setWindowTitle("Graph Visualization - Rute Pengiriman")
-            dialog.setMinimumSize(800, 600)
-            
-            layout = QVBoxLayout(dialog)
-            layout.addWidget(canvas)
-            
-            dialog.exec()
-            
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Gagal menampilkan graph: {str(e)}")
     
     def on_seller_logout(self):
         """Handle logout dari seller dashboard"""
@@ -276,6 +235,7 @@ class AppController(QMainWindow):
 
 def setup_application():
     """Setup aplikasi dengan konfigurasi yang diperlukan"""
+    QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
     app = QApplication(sys.argv)
     
     # Set application properties
