@@ -218,7 +218,7 @@ def buat_visualisasi_timeline_dijkstra(G_peta, gdf_lokasi, path_nodes):
         ax.text(x_coord, y_coord - 0.5, label_text, ha='center', va='top', fontsize=8)
 
     ax.axis('off')
-    ax.set_title("Konfirmasi Rute Pengantaran (Timeline Perjalanan)", fontsize=16, pad=20)
+    ax.set_title("Konfirmasi Rute Pengantaran (Timeline Perjalanan)", fontsize=14, pad=15)
     plt.tight_layout()
     plt.show()
 
