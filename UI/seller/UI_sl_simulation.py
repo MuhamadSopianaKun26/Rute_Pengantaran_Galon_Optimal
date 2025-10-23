@@ -9,17 +9,18 @@ import json
 from PyQt6.QtCore import Qt, QUrl, pyqtSlot, QObject
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QFrame,
-    QComboBox, QPushButton, QSizePolicy, QSpacerItem
+    QComboBox, QPushButton, QSizePolicy, QSpacerItem, QLineEdit, QMessageBox
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineSettings
 from PyQt6.QtWebChannel import QWebChannel
 
 class SellerSimulation(QWidget):
-    def __init__(self, parent=None, current_user: dict | None = None, marker_deleted=None):
+    def __init__(self, parent=None, current_user: dict | None = None, marker_deleted=None, desc_marker=None):
         super().__init__(parent)
         self.current_user = current_user or {}
         self.map_loaded = False
+        self.desc_marker = desc_marker
 
         self.marker_deleted = marker_deleted
 
@@ -65,6 +66,7 @@ class SellerSimulation(QWidget):
         row_mode = QHBoxLayout(); lbl_mode = QLabel("Mode"); lbl_mode.setObjectName("FieldLabel"); self.cmb_mode = QComboBox(); self.cmb_mode.setObjectName("Combo"); self.cmb_mode.addItems(["Node", "Edge"]); row_mode.addWidget(lbl_mode); row_mode.addWidget(self.cmb_mode); input_layout.addLayout(row_mode)
         row_region = QHBoxLayout(); lbl_region = QLabel("Daerah"); lbl_region.setObjectName("FieldLabel"); self.cmb_region = QComboBox(); self.cmb_region.setObjectName("Combo"); row_region.addWidget(lbl_region); row_region.addWidget(self.cmb_region); input_layout.addLayout(row_region)
         row_street = QHBoxLayout(); lbl_street = QLabel("Nama Node"); lbl_street.setObjectName("FieldLabel"); self.cmb_street = QComboBox(); self.cmb_street.setObjectName("Combo"); self.cmb_street.setEditable(False); self.cmb_street.setMinimumWidth(320); row_street.addWidget(lbl_street); row_street.addWidget(self.cmb_street, 1); input_layout.addLayout(row_street)
+        row_desc = QHBoxLayout(); lbl_desc = QLabel("Deskripsi"); lbl_desc.setObjectName("FieldLabel"); self.input_desc = QLineEdit(); self.input_desc.setObjectName("Combo"); self.input_desc.setMinimumWidth(320); row_desc.addWidget(lbl_desc); row_desc.addWidget(self.input_desc, 1); input_layout.addLayout(row_desc)
         btn_row = QHBoxLayout(); btn_row.addStretch(1); self.btn_cut = QPushButton("Cut"); self.btn_cut.setObjectName("Primary"); self.btn_reset = QPushButton("Reset"); self.btn_reset.setObjectName("Secondary"); btn_row.addWidget(self.btn_cut); btn_row.addWidget(self.btn_reset); input_layout.addLayout(btn_row)
         v.addWidget(input_box)
         v.addSpacerItem(QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
@@ -169,7 +171,13 @@ class SellerSimulation(QWidget):
         Dipanggil saat tombol 'Cut' diklik.
         Hanya mencari koordinat node dan mengirimkannya ke JS.
         """
+        text = self.input_desc.text()
+        if not text:
+            return QMessageBox.warning(self, "Peringatan", "Deskripsi tidak boleh kosong!")
         
+        self.desc_marker = []
+        self.desc_marker.append(text)
+        print(self.desc_marker)
         mode = self.cmb_mode.currentText()
         if mode != "Node":
             print(f"Mode '{mode}' belum didukung untuk operasi Cut.")

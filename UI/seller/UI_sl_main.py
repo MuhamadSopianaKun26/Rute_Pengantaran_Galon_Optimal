@@ -421,6 +421,7 @@ class SellerMainWindow(QMainWindow):
         self.current_user = current_user or {}
         self.sidebar_visible = False
         self.marker_deleted = []
+        self.desc_marker = []
         self.init_ui()
         self.setup_animations()
     
@@ -481,8 +482,8 @@ class SellerMainWindow(QMainWindow):
         # Initialize pages
         self.dashboard_page = SellerDashboard(current_user=self.current_user)
         self.history_page = SellerHistory(current_user=self.current_user)
-        self.simulation_page = SellerSimulation(current_user=self.current_user, marker_deleted=self.marker_deleted)
-        self.order_page = SellerDeliveryPage(current_user=self.current_user, marker_deleted=self.marker_deleted)  # Halaman Pengantaran
+        self.simulation_page = SellerSimulation(current_user=self.current_user, marker_deleted=self.marker_deleted, desc_marker=self.desc_marker)
+        self.order_page = SellerDeliveryPage(current_user=self.current_user, marker_deleted=self.marker_deleted, desc_marker=self.desc_marker)  # Halaman Pengantaran
         self.profile_page = SellerProfile(current_user=self.current_user)
         
         # Add pages to stack

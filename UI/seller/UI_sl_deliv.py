@@ -48,11 +48,12 @@ class DeliveryPreviewDialog(QDialog):
     - Bawah: Tombol Kembali dan Kirim Sekarang
     """
 
-    def __init__(self, order: dict, parent=None, marker_deleted=None):
+    def __init__(self, order: dict, parent=None, marker_deleted=None, desc_marker=None):
         super().__init__(parent)
         self.order = order or {}
         self._price_map = _load_products_price_map()
         self.marker_deleted=marker_deleted
+        self.desc_marker=desc_marker
 
         self.setWindowTitle("Preview Pengiriman")
         self.resize(1000, 720)
@@ -95,11 +96,11 @@ class DeliveryPreviewDialog(QDialog):
         map_layout.setSpacing(8)
         map_title = QLabel("Map Rute Pengiriman")
         map_title.setObjectName("SectionTitle")
-        map_desc = QLabel("Visualisasi rute akan ditampilkan di jendela terpisah saat Anda menekan tombol di bawah.")
-        map_desc.setStyleSheet("color:#5A8A9B;")
-        map_desc.setWordWrap(True)
+        self.map_desc = QLabel("Visualisasi rute akan ditampilkan di jendela terpisah saat Anda menekan tombol di bawah.")
+        self.map_desc.setStyleSheet("color:#5A8A9B;")
+        self.map_desc.setWordWrap(True)
         map_layout.addWidget(map_title)
-        map_layout.addWidget(map_desc)
+        map_layout.addWidget(self.map_desc)
         # Label hasil perhitungan rute
         self.lbl_distance = QLabel("Jarak tempuh: -")
         self.lbl_timecalc = QLabel("Estimasi waktu (100 m/s): -")
@@ -272,6 +273,9 @@ class DeliveryPreviewDialog(QDialog):
                 return
             G, gdf = muat_data_peta_dan_lokasi(lokasi_peta, path_ke_geojson=path_geojson)
 
+            self.G_awal = G.copy()
+            self.gdf_lokasi_awal = gdf.copy()
+
             osmid_to_remove = gdf[gdf["intersection_name"].isin(self.marker_deleted)]["osmid"].tolist()
             print("OSMID yang akan dihapus:", osmid_to_remove)
 
@@ -316,17 +320,105 @@ class DeliveryPreviewDialog(QDialog):
         if not dest_name:
             QMessageBox.information(self, "Tujuan Tidak Ditemukan", "Alamat tujuan pembeli tidak tersedia.")
             return None, None, None
-        edges, length_km = cari_rute_by_nama(self.G, self.gdf_lokasi, start_name, dest_name, show_preview=False)
-        if not edges:
-            QMessageBox.information(self, "Rute Tidak Ditemukan", f"Tidak ada rute dari {start_name} ke {dest_name}.")
+        
+
+        # --- HITUNG RUTE PADA GRAF SAAT INI (Normal atau Detour) ---
+        current_edges, current_length_km = cari_rute_by_nama(self.G, self.gdf_lokasi, start_name, dest_name, show_preview=False)
+        
+        # --- HITUNG RUTE Lama PADA GRAF SAAT INI (Normal atau Detour) ---
+        # current_edges_awal, current_length_km_awal = cari_rute_by_nama(self.G_awal, self.gdf_lokasi_awal, start_name, dest_name, show_preview=False)
+
+        # Variabel untuk narasi akhir
+        analysis_str = ""
+        label_jarak = "Jarak Tempuh Total: "
+        label_waktu = "Estimasi Waktu Tempuh: "
+
+        reason_str = self.desc_marker[0]
+        print(f"Reason: {self.desc_marker}")
+
+        # --- LOGIKA BARU: Cek apakah ada simulasi ---
+        if self.marker_deleted:
+            # Ada simulasi, coba hitung rute asli untuk perbandingan
+            if self.G_awal:
+                try:
+                    # Muat GDF asli lagi untuk lookup nama lengkap
+                    _, original_length_km = cari_rute_by_nama(self.G_awal, self.gdf_lokasi_awal, start_name, dest_name, show_preview=False)
+                except Exception as e:
+                    print(f"Gagal menghitung rute asli untuk perbandingan: {e}")
+                    original_length_km = None
+            else:
+                original_length_km = None # Tidak bisa membandingkan jika G_original tidak ada
+
+            if current_edges is None: # Rute alternatif TIDAK ditemukan
+                analysis_str = (
+                    f"Analisis:\n"
+                    f"Rute normal dari '{start_name}' ke '{dest_name}' (jika ada) tidak dapat digunakan "
+                    f"karena penutupan persimpangan {reasons_str}. "
+                    f"Saat ini TIDAK ADA rute alternatif yang tersedia."
+                )
+                label_jarak = "Jarak Tempuh Total: Rute terputus!"
+                label_waktu = "Estimasi Waktu Tempuh: Tidak dapat dihitung"
+                current_length_km = None # Set agar tidak dihitung nanti
+
+            elif original_length_km is not None: # Rute asli dan alternatif ditemukan
+                kecepatan_km_per_menit = 36 / 60
+                estimated_minutes_detour = current_length_km / kecepatan_km_per_menit
+                
+                
+                analysis_str = (
+                    f"Analisis:\n"
+                    f"Rute terpendek normal adalah {original_length_km:.2f} km. "
+                    f"Namun, dikarenakan adanya {reasons_str}, "
+                    f"rute dialihkan menjadi {current_length_km:.2f} km (+{current_length_km - original_length_km:.2f} km). "
+                    f"Dengan asumsi kecepatan 36 km/jam, estimasi waktu tempuh menjadi sekitar {math.ceil(estimated_minutes_detour)} menit."
+                )
+                label_jarak = f"Jarak Tempuh (Alternatif): {current_length_km:.2f} km"
+                label_waktu = f"Estimasi Waktu Tempuh: {math.ceil(estimated_minutes_detour)} menit (via detour)"
+
+            else: # Rute alternatif ditemukan, tapi rute asli gagal dihitung
+                # Tampilkan info rute alternatif saja
+                kecepatan_km_per_menit = 36 / 60
+                estimated_minutes_detour = current_length_km / kecepatan_km_per_menit
+                
+                analysis_str = (
+                    f"Analisis:\n"
+                    f"Jaringan sedang dalam simulasi {reasons_str}. "
+                    f"Rute alternatif yang ditemukan adalah {current_length_km:.2f} km. "
+                    f"Estimasi waktu tempuh sekitar {math.ceil(estimated_minutes_detour)} menit (asumsi 36 km/jam)."
+                )
+                label_jarak = f"Jarak Tempuh (Alternatif): {current_length_km:.2f} km"
+                label_waktu = f"Estimasi Waktu Tempuh: {math.ceil(estimated_minutes_detour)} menit"
+
+        # --- JIKA TIDAK ADA SIMULASI (KONDISI NORMAL) ---
+        else:
+            if current_edges is None:
+                # ... (Error handling rute normal tidak ditemukan, SAMA seperti sebelumnya) ...
+                return None, None, None
+                
+            # Rute normal ditemukan
+            kecepatan_km_per_menit = 36 / 60
+            estimated_minutes_normal = current_length_km / kecepatan_km_per_menit
+            
+            analysis_str = (
+                f"Analisis:\n"
+                f"Rute terpendek dari '{start_name}' ke '{dest_name}' adalah {current_length_km:.2f} km. "
+                f"Dengan asumsi kecepatan 36 km/jam, perjalanan ini diperkirakan memakan waktu sekitar {math.ceil(estimated_minutes_normal)} menit. "
+                f"Waktu tempuh aktual dapat bervariasi."
+            )
+            label_jarak = f"Jarak Tempuh Total: {current_length_km:.2f} km"
+            label_waktu = f"Estimasi Waktu Tempuh: {math.ceil(estimated_minutes_normal)} menit"
+
+        # --- Update label UI DENGAN HASIL AKHIR ---
+        self.lbl_distance.setText(label_jarak)
+        self.lbl_timecalc.setText(label_waktu)
+        self.map_desc.setText(analysis_str) # Pastikan label ini ada di _build_ui
+
+        # Kembalikan hasil rute saat ini (normal atau detour)
+        if current_edges:
+            path_nodes = [current_edges[0][0]] + [e[1] for e in current_edges]
+            return path_nodes, current_length_km, dest_name
+        else:
             return None, None, None
-        # Rekonstruksi nodes dari edges
-        path_nodes = [edges[0][0]] + [e[1] for e in edges]
-        # Update label jarak & estimasi waktu (100 m/s)
-        self.lbl_distance.setText(f"Jarak tempuh: {length_km:.2f} km")
-        seconds = (length_km * 1000.0) / 100.0
-        self.lbl_timecalc.setText(f"Estimasi waktu (100 m/s): {seconds:.1f} detik")
-        return path_nodes, length_km, dest_name
 
     def _on_show_fastest_route(self):
         path_nodes, length_km, dest_name = self._compute_route()
