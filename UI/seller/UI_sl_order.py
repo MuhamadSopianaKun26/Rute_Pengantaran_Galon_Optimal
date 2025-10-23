@@ -188,7 +188,6 @@ class OrderCard(QFrame):
         """Set status menjadi 'dalam_perjalanan' (dalam pengantaran)."""
         # Tampilkan dialog preview terlebih dahulu
         try:
-            print(f"Reason: {self.desc_marker}")
             dlg = DeliveryPreviewDialog(self.order, marker_deleted=self.marker_deleted, parent=self, desc_marker=self.desc_marker)
             res = dlg.exec()
             if res == QDialog.DialogCode.Accepted:
@@ -408,7 +407,6 @@ class SellerDeliveryPage(QWidget):
 
         # Tambah kartu untuk tiap order
         for order in self._orders:
-            print(f"Reason: {self.desc_marker}")
             self.container_layout.addWidget(OrderCard(order, marker_deleted=self.marker_deleted, desc_marker=self.desc_marker))
 
         # Tambah spacer agar list tidak terlalu rapat bawah

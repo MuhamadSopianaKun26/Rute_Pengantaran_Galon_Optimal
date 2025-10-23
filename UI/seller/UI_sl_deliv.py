@@ -333,8 +333,7 @@ class DeliveryPreviewDialog(QDialog):
         label_jarak = "Jarak Tempuh Total: "
         label_waktu = "Estimasi Waktu Tempuh: "
 
-        reason_str = self.desc_marker[0]
-        print(f"Reason: {self.desc_marker}")
+        reasons_str = self.desc_marker[0]
 
         # --- LOGIKA BARU: Cek apakah ada simulasi ---
         if self.marker_deleted:

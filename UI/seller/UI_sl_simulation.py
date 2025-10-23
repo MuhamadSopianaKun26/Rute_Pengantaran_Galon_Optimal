@@ -175,8 +175,11 @@ class SellerSimulation(QWidget):
         if not text:
             return QMessageBox.warning(self, "Peringatan", "Deskripsi tidak boleh kosong!")
         
-        self.desc_marker = []
-        self.desc_marker.append(text)
+        if not self.desc_marker:
+            self.desc_marker.append(text)
+        else:
+            self.desc_marker[0] = text
+            
         print(self.desc_marker)
         mode = self.cmb_mode.currentText()
         if mode != "Node":
