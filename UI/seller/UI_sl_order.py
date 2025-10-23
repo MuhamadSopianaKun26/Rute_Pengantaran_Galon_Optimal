@@ -18,6 +18,7 @@ try:
     # Import fungsi logic untuk load/save data pesanan
     from logic.file.order_logic import load_orders, save_orders
     from UI.seller.UI_sl_deliv import DeliveryPreviewDialog
+    from UI.seller.UI_sl_Gcoloring import OrderPreviewDialog
 except Exception:
     # Fallback jika modul belum tersedia saat dev
     def load_orders():
@@ -373,6 +374,22 @@ class SellerDeliveryPage(QWidget):
         title.setObjectName("PageTitle")
         title.setStyleSheet("QLabel#PageTitle { font-size: 20px; font-weight: 800; color: #0f5b6b; }")
 
+        self.btn_preview_orderan = QPushButton()
+        self.btn_preview_orderan.setText("Preview Orderan")
+        self.btn_preview_orderan.setStyleSheet("""
+            QPushButton {
+                background: #F8FFFF;
+                color: #2196F3;
+                font-weight: 700; 
+                padding: 10px 18px; 
+                border-radius: 8px; 
+                border: 2px solid #2196F3;
+            }
+            QPushButton:hover {
+                background-color: #97C9F5;
+            }
+        """)
+
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -383,7 +400,11 @@ class SellerDeliveryPage(QWidget):
         self.container_layout.setSpacing(10)
         self.scroll.setWidget(self.container)
 
-        root.addWidget(title)
+        self.title_layout = QHBoxLayout()
+        self.title_layout.addWidget(title)
+        self.title_layout.addStretch(5)
+        self.title_layout.addWidget(self.btn_preview_orderan)
+        root.addLayout(self.title_layout)
         root.addWidget(self.scroll)
 
         self.setStyleSheet(
@@ -392,6 +413,12 @@ class SellerDeliveryPage(QWidget):
             QScrollArea { background: transparent; }
             """
         )
+
+        # Events
+        try:
+            self.btn_preview_orderan.clicked.connect(self._on_open_order_preview_dialog)
+        except Exception:
+            pass
 
     def reload_orders(self):
         """Muat ulang data pesanan dan tampilkan hanya status tertentu untuk pengantaran."""
@@ -416,4 +443,11 @@ class SellerDeliveryPage(QWidget):
         """Setter current user lalu reload tampilan."""
         self.current_user = user or {}
         self.reload_orders()
+
+    def _on_open_order_preview_dialog(self):
+        try:
+            dlg = OrderPreviewDialog(self)
+            dlg.exec()
+        except Exception:
+            pass
 

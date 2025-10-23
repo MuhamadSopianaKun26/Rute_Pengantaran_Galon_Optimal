@@ -10,7 +10,7 @@
     ],
     "eta": "-",
     "schedule": "Segera",
-    "status": "menunggu",
+    "status": "sedang_disiapkan",
     "area": "sari rasa",
     "street": "Jl. Sari Rasa 1",
     "note": "12345",
@@ -52,7 +52,7 @@
     ],
     "eta": "-",
     "schedule": "Segera",
-    "status": "dalam_perjalanan",
+    "status": "sedang_disiapkan",
     "area": "Sariasih",
     "street": "Jalan Sariasih & Jalan Terusan Sari Asih & Jalan Tirtasari",
     "note": "",
@@ -94,7 +94,7 @@
     ],
     "eta": "12.00",
     "schedule": "12.00",
-    "status": "dalam_perjalanan",
+    "status": "sedang_disiapkan",
     "area": "Sarimanah",
     "street": "Jalan Terusan Prof. Dr. Ir. Sutami",
     "note": "",
@@ -120,5 +120,209 @@
     "created_at": "2025-10-23T03:59:28.790213",
     "user_name": "argi kimang",
     "user_email": "argii@gmail.com"
+  },
+  {
+    "id": "ORD-101",
+    "customer_name": "Pak Dedi",
+    "items": [
+      { "name": "Galon Aqua 19L Original", "qty": 4 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama1",
+    "note": ""
+  },
+  {
+    "id": "ORD-102",
+    "customer_name": "Bu Rina",
+    "items": [
+      { "name": "Galon Le-Mineral 19L", "qty": 3 },
+      { "name": "Tutup Galon", "qty": 2 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama2",
+    "note": ""
+  },
+  {
+    "id": "ORD-103",
+    "customer_name": "Kang Ujang",
+    "items": [
+      { "name": "Galon Aqua 19L Refil", "qty": 3 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama3",
+    "note": ""
+  },
+  {
+    "id": "ORD-104",
+    "customer_name": "Teh Mira",
+    "items": [
+      { "name": "Galon Cleo 19L", "qty": 4 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama4",
+    "note": ""
+  },
+
+  {
+    "id": "ORD-105",
+    "customer_name": "Bapak Yusuf",
+    "items": [
+      { "name": "Galon Ades 19L", "qty": 2 },
+      { "name": "Air Mineral 600ml (box)", "qty": 1 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama5",
+    "note": ""
+  },
+  {
+    "id": "ORD-106",
+    "customer_name": "Teh Sari",
+    "items": [
+      { "name": "Galon Aqua 19L Original", "qty": 2 },
+      { "name": "Air Mineral 1.5L (box)", "qty": 1 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama6",
+    "note": ""
+  },
+  {
+    "id": "ORD-107",
+    "customer_name": "Pak Ridwan",
+    "items": [
+      { "name": "Galon Le-Mineral 19L", "qty": 2 },
+      { "name": "Air Mineral 600ml (box)", "qty": 1 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama7",
+    "note": ""
+  },
+  {
+    "id": "ORD-108",
+    "customer_name": "Teh Rika",
+    "items": [
+      { "name": "Galon Cleo 19L", "qty": 2 },
+      { "name": "Air Mineral gelas (box)", "qty": 1 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama8",
+    "note": ""
+  },
+  {
+    "id": "ORD-109",
+    "customer_name": "Pak Dani",
+    "items": [
+      { "name": "Galon Aqua 19L Refil", "qty": 1 },
+      { "name": "Air Mineral 600ml (box)", "qty": 2 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama9",
+    "note": ""
+  },
+  {
+    "id": "ORD-110",
+    "customer_name": "Bu Ratna",
+    "items": [
+      { "name": "Galon Aqua 19L Original", "qty": 1 },
+      { "name": "Air Mineral 1.5L (box)", "qty": 2 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama10",
+    "note": ""
+  },
+  {
+    "id": "ORD-111",
+    "customer_name": "Mas Firmansyah",
+    "items": [
+      { "name": "Galon Ades 19L", "qty": 1 },
+      { "name": "Air Mineral gelas (box)", "qty": 2 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama11",
+    "note": ""
+  },
+  {
+    "id": "ORD-112",
+    "customer_name": "Bu Ana",
+    "items": [
+      { "name": "Galon Cleo 19L", "qty": 1 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama12",
+    "note": ""
+  },
+  {
+    "id": "ORD-113",
+    "customer_name": "Teh Nia",
+    "items": [
+      { "name": "Galon Aqua 19L Refil", "qty": 1 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama13",
+    "note": ""
+  },
+  {
+    "id": "ORD-114",
+    "customer_name": "Pak Wawan",
+    "items": [
+      { "name": "Galon Le-Mineral 19L", "qty": 1 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama14",
+    "note": ""
+  },
+  {
+    "id": "ORD-115",
+    "customer_name": "Bu Sri",
+    "items": [
+      { "name": "Galon Aqua 19L Original", "qty": 1 }
+    ],
+    "eta": "-",
+    "schedule": "Segera",
+    "status": "sedang_disiapkan",
+    "area": "Ciwaruga",
+    "street": "Jalan Tanpa Nama15",
+    "note": ""
   }
 ]

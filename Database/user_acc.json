@@ -17,7 +17,7 @@
             "password": "2c02e08865c6b7171a52ef6332ed5e71a1f1145c90671acfcd4a4c0ec04e46cf",
             "role": "seller",
             "created_at": "2025-10-14T03:06:02.508597",
-            "last_login": "2025-10-23T12:37:50.280641",
+            "last_login": "2025-10-23T21:59:41.663786",
             "is_active": true
         },
         {
@@ -47,7 +47,7 @@
             "password": "68022c6f7fd59db79716e1cd0596f451cb79e825ccc376ed399b6750312f74cf",
             "role": "customer",
             "created_at": "2025-10-15T12:34:45.927492",
-            "last_login": "2025-10-21T19:42:23.933215",
+            "last_login": "2025-10-23T21:57:12.295831",
             "is_active": true,
             "area": "Sariasih",
             "street": "Jalan Sariasih & Jalan Sariasih III",
@@ -89,7 +89,7 @@
     ],
     "metadata": {
         "created_at": "2025-10-14T02:53:45.225005",
-        "last_updated": "2025-10-23T12:37:50.280919",
+        "last_updated": "2025-10-23T21:59:41.663831",
         "total_users": 8
     }
 }
