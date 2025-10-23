@@ -245,7 +245,7 @@ def visualize_coloring(G: nx.Graph,
     Menampilkan graf dengan warna sesuai coloring, dan menampilkan ringkasan bins.
     """
     # draw graph colored
-    pos = nx.spring_layout(G, seed=71)
+    pos = nx.kamada_kawai_layout(G)
     display_graph(G, pos=pos, node_color_map=coloring, title="Delivery Conflict Graph (colored)", figsize=figsize)
 
     # print bins summary
