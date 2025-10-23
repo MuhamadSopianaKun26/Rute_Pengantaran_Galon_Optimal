@@ -6,9 +6,9 @@
     { "name": "Galon Cleo 19L", "price": 20000 },
     { "name": "Galon Ades 19L", "price": 21000 },
 
-    { "name": "Air Mineral 600ml (12 pcs)", "price": 35000 },
-    { "name": "Air Mineral 1.5L (6 pcs)", "price": 35000 },
-    { "name": "Air Mineral gelas (1 dus)", "price": 23000 },
+    { "name": "Air Mineral 600ml (box)", "price": 35000 },
+    { "name": "Air Mineral 1.5L (box)", "price": 35000 },
+    { "name": "Air Mineral gelas (box)", "price": 23000 },
 
 
     { "name": "Tutup Galon", "price": 2000 },

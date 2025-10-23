@@ -17,7 +17,7 @@
             "password": "2c02e08865c6b7171a52ef6332ed5e71a1f1145c90671acfcd4a4c0ec04e46cf",
             "role": "seller",
             "created_at": "2025-10-14T03:06:02.508597",
-            "last_login": "2025-10-23T12:37:50.280641",
+            "last_login": "2025-10-23T12:45:34.389246",
             "is_active": true
         },
         {
@@ -89,7 +89,7 @@
     ],
     "metadata": {
         "created_at": "2025-10-14T02:53:45.225005",
-        "last_updated": "2025-10-23T12:37:50.280919",
+        "last_updated": "2025-10-23T12:45:34.389550",
         "total_users": 8
     }
 }
