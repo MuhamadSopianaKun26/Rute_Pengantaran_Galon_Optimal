@@ -17,7 +17,7 @@
             "password": "2c02e08865c6b7171a52ef6332ed5e71a1f1145c90671acfcd4a4c0ec04e46cf",
             "role": "seller",
             "created_at": "2025-10-14T03:06:02.508597",
-            "last_login": "2025-10-21T20:29:19.010927",
+            "last_login": "2025-10-23T12:37:50.280641",
             "is_active": true
         },
         {
@@ -60,7 +60,7 @@
             "password": "d8a352f0b3ce076e6a536d0bcab17898fe2d4d6038427f541b764ee7d488ad95",
             "role": "customer",
             "created_at": "2025-10-15T13:02:57.143165",
-            "last_login": "2025-10-21T23:18:51.838804",
+            "last_login": "2025-10-23T03:58:47.926265",
             "is_active": true,
             "area": "",
             "street": "",
@@ -75,11 +75,21 @@
             "created_at": "2025-10-20T10:08:36.517181",
             "last_login": "2025-10-20T10:10:01.156697",
             "is_active": true
+        },
+        {
+            "id": 8,
+            "name": "Asep Saepudin",
+            "email": "asep123@gmail.com",
+            "password": "9d2fd291f436f88bfc2d221f34ccd9e07399be0dd24dbf9f1cea910eb2a5de51",
+            "role": "customer",
+            "created_at": "2025-10-23T08:15:39.321082",
+            "last_login": "2025-10-23T08:15:50.510726",
+            "is_active": true
         }
     ],
     "metadata": {
         "created_at": "2025-10-14T02:53:45.225005",
-        "last_updated": "2025-10-21T23:18:51.838849",
-        "total_users": 7
+        "last_updated": "2025-10-23T12:37:50.280919",
+        "total_users": 8
     }
 }

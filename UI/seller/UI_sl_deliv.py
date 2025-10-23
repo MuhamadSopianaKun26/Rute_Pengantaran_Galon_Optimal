@@ -4,7 +4,8 @@ from PyQt6.QtWidgets import (
     QListWidget, QListWidgetItem, QPushButton, QSpacerItem, QSizePolicy, QMessageBox, QScrollArea
 )
 import textwrap
-import os, json, datetime
+import os, json, datetime, random
+from datetime import time
 import math
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -88,13 +89,14 @@ class DeliveryPreviewDialog(QDialog):
         title.setObjectName("Title")
         layout.addWidget(title)
 
-        # Bagian atas: Placeholder Map (5 bagian)
+        # Bagian atas: Analisis Rute Pengantaran 
         self.map_box = QFrame()
         self.map_box.setObjectName("MapBox")
         map_layout = QVBoxLayout(self.map_box)
         map_layout.setContentsMargins(16, 16, 16, 16)
-        map_layout.setSpacing(8)
-        map_title = QLabel("Map Rute Pengiriman")
+        map_layout.setSpacing(10) # Sedikit perbesar jarak antar label
+
+        map_title = QLabel("Analisis Rute Pengantaran")
         map_title.setObjectName("SectionTitle")
         self.map_desc = QLabel("Visualisasi rute akan ditampilkan di jendela terpisah saat Anda menekan tombol di bawah.")
         self.map_desc.setStyleSheet("color:#5A8A9B;")
@@ -107,8 +109,20 @@ class DeliveryPreviewDialog(QDialog):
         self.lbl_distance.setStyleSheet("color:#2C5F6F;font-weight:600;")
         self.lbl_timecalc.setStyleSheet("color:#2C5F6F;")
         map_layout.addWidget(self.lbl_distance)
-        map_layout.addWidget(self.lbl_timecalc)
-        map_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+
+        # Label untuk menampilkan Estimasi Waktu (berdasarkan 36 km/jam)
+        self.lbl_estimated_time = QLabel("Estimasi Waktu Tempuh: Menghitung...")
+        self.lbl_estimated_time.setStyleSheet("color:#3b6a75; font-size: 13px;")
+        map_layout.addWidget(self.lbl_estimated_time)
+        
+        # Label untuk narasi/analisis tambahan
+        self.lbl_analysis_text = QLabel("Analisis:\nMenunggu perhitungan rute...")
+        self.lbl_analysis_text.setStyleSheet("color:#5A8A9B; font-style: italic;")
+        self.lbl_analysis_text.setWordWrap(True)
+        map_layout.addWidget(self.lbl_analysis_text)
+
+        # Spacer agar konten tidak terlalu renggang jika rute pendek
+        map_layout.addStretch(1)
 
         # Bagian bawah: Info kiri + Rincian kanan (3 bagian tinggi)
         bottom = QHBoxLayout()
@@ -128,6 +142,8 @@ class DeliveryPreviewDialog(QDialog):
         self.lbl_address.setWordWrap(True)
         self.lbl_address.setStyleSheet("color:#3b6a75;")
 
+        self.lbl_order_type = QLabel()
+        self.lbl_order_type.setStyleSheet("color:#2C5F6F; font-weight:bold;")
         self.lbl_eta_duration = QLabel()
         self.lbl_eta_duration.setStyleSheet("color:#2C5F6F;")
         self.lbl_eta_arrival = QLabel()
@@ -136,6 +152,7 @@ class DeliveryPreviewDialog(QDialog):
         info_layout.addWidget(self.lbl_buyer)
         info_layout.addWidget(self.lbl_address)
         info_layout.addSpacing(8)
+        info_layout.addWidget(self.lbl_order_type)
         info_layout.addWidget(self.lbl_eta_duration)
         info_layout.addWidget(self.lbl_eta_arrival)
         info_layout.addStretch(1)
@@ -201,11 +218,51 @@ class DeliveryPreviewDialog(QDialog):
         note_text = f"\nKeterangan: {note}" if note else ""
         self.lbl_address.setText(f"Alamat: {area} - {street}{note_text}")
 
+        # Order Type
+        order_type = self.order.get('schedule')
+        self.lbl_order_type.setText(f"Jadwal Pesanan: {order_type}")
+
         # Estimasi
-        duration_min = self._estimate_duration_minutes()
-        self.lbl_eta_duration.setText(f"Estimasi Waktu Pengiriman: {duration_min} menit")
-        arrival_str = self._estimate_arrival_hhmm(duration_min)
-        self.lbl_eta_arrival.setText(f"Estimasi Sampai: {arrival_str}")
+        self._load_graph_if_needed()
+        start_name = "Depot Air Pusat"
+        dest_name = self._get_destination_name()
+        edges = []
+        length_km = 0.0
+        if self.G is not None and self.gdf_lokasi is not None and dest_name:
+            try:
+                edges, length_km = cari_rute_by_nama(self.G, self.gdf_lokasi, start_name, dest_name, show_preview=False)
+            except Exception:
+                edges, length_km = [], 0.0
+        # Pastikan waktu_kirim berupa datetime
+        schedule = self.order.get('schedule') or 'Segera'
+        if schedule != 'Segera':
+            s = str(schedule).replace('.', ':')
+            try:
+                today = datetime.datetime.now()
+                hh, mm = s.split(':')
+                waktu_kirim_dt = today.replace(hour=int(hh), minute=int(mm), second=0, microsecond=0)
+            except Exception:
+                waktu_kirim_dt = datetime.datetime.now()
+        else:
+            waktu_kirim_dt = datetime.datetime.now()
+        jumlah_tikungan = len(edges) if edges else 0
+
+        if not edges or not length_km:
+            # Tidak ada jalur yang ditemukan
+            self.waktu_tempuh_detik = None
+            self.waktu_tempuh = None
+            self.lbl_eta_duration.setText("Estimasi Waktu Pengiriman: Tidak ada jalur yang ditemukan")
+            self.lbl_eta_arrival.setText("Estimasi Sampai: -")
+        else:
+            total_detik = self.hitung_simulasi_kecepatan(float(length_km), waktu_kirim_dt, jumlah_tikungan)
+            self.waktu_tempuh_detik = int(round(total_detik))
+            menit = self.waktu_tempuh_detik // 60
+            detik = self.waktu_tempuh_detik % 60
+            # Pertahankan kompatibilitas: variabel menit yang dipakai bagian lain
+            self.waktu_tempuh = menit
+            self.lbl_eta_duration.setText(f"Estimasi Waktu Pengiriman: {menit} menit {detik} detik")
+            arrival_str = self._estimate_arrival_hhmm(self.waktu_tempuh)
+            self.lbl_eta_arrival.setText(f"Estimasi Sampai: {arrival_str}")
 
         # Rincian item & total
         total = 0
@@ -314,11 +371,19 @@ class DeliveryPreviewDialog(QDialog):
         self._load_graph_if_needed()
         if self.G is None or self.gdf_lokasi is None:
             QMessageBox.warning(self, "Gagal Memuat Peta", "Data peta atau GeoJSON tidak dapat dimuat.")
+            # Reset label jika gagal
+            self.lbl_distance.setText("Jarak Tempuh Total: Gagal memuat peta")
+            self.lbl_estimated_time.setText("Estimasi Waktu Tempuh: Gagal memuat peta")
+            self.lbl_analysis_text.setText("Analisis:\nTidak dapat menghitung rute karena data peta tidak tersedia.")
             return None, None, None
-        start_name = "Depot Air Pusat"
+            
+        start_name = "Depot Air Pusat" # Pastikan nama ini ADA di GeoJSON Anda
         dest_name = self._get_destination_name()
         if not dest_name:
-            QMessageBox.information(self, "Tujuan Tidak Ditemukan", "Alamat tujuan pembeli tidak tersedia.")
+            QMessageBox.information(self, "Tujuan Tidak Ditemukan", "Alamat tujuan (intersection_name) pembeli tidak tersedia atau tidak valid.")
+            self.lbl_distance.setText("Jarak Tempuh Total: Tujuan tidak valid")
+            self.lbl_estimated_time.setText("Estimasi Waktu Tempuh: Tujuan tidak valid")
+            self.lbl_analysis_text.setText("Analisis:\nTidak dapat menghitung rute karena nama tujuan tidak ditemukan di data lokasi.")
             return None, None, None
         
 
@@ -439,6 +504,74 @@ class DeliveryPreviewDialog(QDialog):
             return
         dlg = NodeTimelineDialog(self.gdf_lokasi, self.G, path_nodes, title=f"Timeline Dijkstra: Depot Air Pusat → {dest_name}")
         dlg.exec()
+
+    def get_tingkat_kemacetan(self, waktu_kirim: datetime) -> float:
+        jam = waktu_kirim.time()
+
+        if time(0,0) <= jam < time(6,0):
+            return 0
+        elif time(6,0) <= jam < time(8,0):
+            return 1
+        elif time(8,0) <= jam < time(10,0):
+            return 0.5
+        elif time(10,0) <= jam < time(15,30):
+            return 0.2
+        elif time(15,30) <= jam < time(18,0):
+            return 0.8
+        elif time(18,0) <= jam < time(20,0):
+            return 0.2
+        else:
+            return 0
+
+    def get_max_speed_from_kemacetan(self, kemacetan: float) -> float:
+        if kemacetan == 0:
+            return 60
+        elif kemacetan == 0.2:
+            return 48
+        elif kemacetan == 0.5:
+            return 30
+        elif kemacetan == 0.8:
+            return 20
+        elif kemacetan == 1.0:
+            return 15
+
+    def hitung_simulasi_kecepatan(self, jarak_km: float, waktu_kirim: datetime, jumlah_tikungan: int):
+        kemacetan = self.get_tingkat_kemacetan(waktu_kirim)
+        max_speed = self.get_max_speed_from_kemacetan(kemacetan)
+        min_speed = 15
+        base_speed = 45
+        speed = base_speed
+
+        total_waktu_detik = 0
+
+        # Simulasi hingga jarak habis
+        while jarak_km > 0:
+            total_waktu_detik += 10  # setiap step = 10 detik
+
+            # random naik atau turun
+            arah = random.choice(["up", "down"])
+
+            if arah == "up":
+                speed += 5
+            else:
+                speed -= 5
+
+            # apply batas dinamis
+            if speed > max_speed:
+                speed = max_speed
+            if speed < min_speed:
+                speed = min_speed
+
+            # hitung jarak yang ditempuh di interval 10 detik
+            jarak_tempuh = speed * (10 / 3600)
+            jarak_km -= jarak_tempuh
+        
+        # 6. tambahan waktu akibat tikungan (tiap tikungan 3 detik @ 20km/jam)
+        waktu_tikungan = jumlah_tikungan * (3 / 3600)
+        total_waktu_detik += waktu_tikungan
+
+        return total_waktu_detik
+
 
 
 class RoutePreviewDialog(QDialog):

@@ -79,7 +79,9 @@ class HeaderBar(QWidget):
                 outline: none;
             }
             QPushButton:hover {
-                background-color: rgba(255, 255, 255, 0.25);
+                background-color: #AEDFF7;
+                color: #0B3D91;
+                border: 1px solid #0B3D91;
             }
             QPushButton:pressed {
                 background-color: rgba(255, 255, 255, 0.35);
@@ -487,11 +489,13 @@ class SellerMainWindow(QMainWindow):
         self.profile_page = SellerProfile(current_user=self.current_user)
         
         # Add pages to stack
+        # Tambahkan halaman ke stack setelah inisialisasi
         self.content_stack.addWidget(self.dashboard_page)   # Index 0
-        self.content_stack.addWidget(self.history_page)     # Index 1
-        self.content_stack.addWidget(self.simulation_page)  # Index 2
-        self.content_stack.addWidget(self.order_page)       # Index 3
-        self.content_stack.addWidget(self.profile_page)     # Index 4
+        self.content_stack.addWidget(self.order_page)       # Index 1 
+        self.content_stack.addWidget(self.profile_page)     # Index 2
+        self.content_stack.addWidget(self.history_page)     # Index 3
+        self.content_stack.addWidget(self.simulation_page)  # Index 4
+
         
         # Right container holds main content and bottom nav vertically
         right_container = QWidget()
@@ -609,10 +613,12 @@ class SellerMainWindow(QMainWindow):
         """Change main content page via bottom nav. Index 1 membuka halaman Pengantaran."""
         # 0=Dashboard, 1=Pengantaran, 2=Profil
         if index == 1:
-            # Buka halaman Pengantaran (index 3 pada stack)
-            self.content_stack.setCurrentIndex(3)
+            if self.order_page is None:
+                self.order_page = SellerDeliveryPage(current_user=self.current_user, marker_deleted=self.marker_deleted)
+                self.content_stack.addWidget(self.order_page)
+            target_idx = self.content_stack.indexOf(self.order_page)
+            self.content_stack.setCurrentIndex(target_idx)
             self.bottom_nav.set_active_button(1)
-            # Refresh hanya halaman pengantaran agar data terbaru
             try:
                 self._show_loading()
                 QTimer.singleShot(300, lambda: (self.order_page.reload_orders(), self._hide_loading()))
@@ -620,12 +626,14 @@ class SellerMainWindow(QMainWindow):
                 self._hide_loading()
             return
         if index == 2:
-            # Profil pada bottom-nav diarahkan ke page profil (index 4)
-            self.content_stack.setCurrentIndex(4)
+            if self.profile_page is None:
+                self.profile_page = SellerProfile(current_user=self.current_user)
+                self.content_stack.addWidget(self.profile_page)
+            target_idx = self.content_stack.indexOf(self.profile_page)
+            self.content_stack.setCurrentIndex(target_idx)
+            self.bottom_nav.set_active_button(2)
         else:
-            # Dashboard index 0
-            self.content_stack.setCurrentIndex(index)
-            # Refresh dashboard
+            self.content_stack.setCurrentIndex(0)
             try:
                 self._show_loading()
                 QTimer.singleShot(300, lambda: (self.dashboard_page.reload_orders(), self._hide_loading()))
@@ -663,7 +671,11 @@ class SellerMainWindow(QMainWindow):
 
     def show_history(self):
         """Show history page (keep sidebar open)"""
-        self.content_stack.setCurrentIndex(1)
+        if self.history_page is None:
+            self.history_page = SellerHistory(current_user=self.current_user)
+            self.content_stack.addWidget(self.history_page)
+        target_idx = self.content_stack.indexOf(self.history_page)
+        self.content_stack.setCurrentIndex(target_idx)
         # Sembunyikan bottom nav untuk halaman history
         self.bottom_nav.hide()
         self.sidebar.set_active("history")
@@ -671,26 +683,30 @@ class SellerMainWindow(QMainWindow):
         try:
             self._show_loading()
             QTimer.singleShot(300, lambda: (self.history_page.reload_history(), self._hide_loading()))
-        except Exception:
+        except Exception: 
             self._hide_loading()
 
     def show_simulation(self):
-        """Show simulation page (keep sidebar open)"""
-        # Pastikan peta di-load sekali sebelum halaman ditampilkan
-        try:
-            if hasattr(self, 'simulation_page') and hasattr(self.simulation_page, 'load_map_if_needed'):
-                self.simulation_page.load_map_if_needed()
-        except Exception:
-            pass
-        self.content_stack.setCurrentIndex(2)
-        # Sembunyikan bottom nav untuk halaman simulasi
+        """Show simulation page"""
+        target_idx = self.content_stack.indexOf(self.simulation_page)
+        if target_idx == -1:
+            self.simulation_page = SellerSimulation(current_user=self.current_user)
+            self.content_stack.addWidget(self.simulation_page)
+            target_idx = self.content_stack.indexOf(self.simulation_page)
+        
+        self.content_stack.setCurrentIndex(target_idx)
+        # Tambahkan ini untuk load peta otomatis
+        self.simulation_page.load_map_if_needed()
         self.bottom_nav.hide()
         self.sidebar.set_active("simulation")
-        self.update_bottom_nav_for("simulation")
     
     def show_profile(self):
         """Show profile page"""
-        self.content_stack.setCurrentIndex(4)
+        if self.profile_page is None:
+            self.profile_page = SellerProfile(current_user=self.current_user)
+            self.content_stack.addWidget(self.profile_page)
+        target_idx = self.content_stack.indexOf(self.profile_page)
+        self.content_stack.setCurrentIndex(target_idx)
         self.bottom_nav.set_active_button(2)
         self.bottom_nav.show()
         # Tidak perlu reload untuk profil

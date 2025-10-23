@@ -43,7 +43,7 @@ def _load_areas_from_json() -> dict:
         return fallback
 
 def _load_area_streets_from_geojson() -> dict:
-    path = _graph_path('intersections_area.geojson')
+    path = _graph_path('output.geojson')
     try:
         with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)

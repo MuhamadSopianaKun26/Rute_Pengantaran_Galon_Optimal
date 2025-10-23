@@ -107,7 +107,6 @@ class AppController(QMainWindow):
             
             # Connect signals
             self.customer_dashboard.logout_requested.connect(self.on_customer_logout)
-            self.customer_dashboard.simulation_requested.connect(self.on_simulation_request)
             
             # Hide main window and show customer dashboard
             self.hide()

@@ -38,25 +38,6 @@
     "user_email": "pian@gmail.com"
   },
   {
-    "id": "ORD-006",
-    "customer_name": "GUest 2",
-    "items": [
-      {
-        "name": "Galon Aqua 19L",
-        "qty": 1
-      }
-    ],
-    "eta": "-",
-    "schedule": "Segera",
-    "status": "dalam_perjalanan",
-    "area": "Sariasih",
-    "street": "Jalan Kampus Polban & Jalan Sariasih & Jalan Terusan Sari Asih & Jalan Villa Duta",
-    "note": "",
-    "created_at": "2025-10-21T16:14:30.587550",
-    "user_name": "Guest person",
-    "user_email": "guest@gmail.com"
-  },
-  {
     "id": "ORD-007",
     "customer_name": "Argii 2",
     "items": [
@@ -71,11 +52,72 @@
     ],
     "eta": "-",
     "schedule": "Segera",
-    "status": "menunggu",
+    "status": "dalam_perjalanan",
     "area": "Sariasih",
     "street": "Jalan Sariasih & Jalan Terusan Sari Asih & Jalan Tirtasari",
     "note": "",
     "created_at": "2025-10-21T23:19:29.008407",
+    "user_name": "argi kimang",
+    "user_email": "argii@gmail.com"
+  },
+  {
+    "id": "ORD-008",
+    "customer_name": "Guest 4",
+    "items": [
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      },
+      {
+        "name": "Galon Aqua 19L",
+        "qty": 1
+      }
+    ],
+    "eta": "15.00",
+    "schedule": "15.00",
+    "status": "sedang_disiapkan",
+    "area": "Gerlong",
+    "street": "Jalan Abadi II",
+    "note": "",
+    "created_at": "2025-10-23T02:47:03.617139",
+    "user_name": "Guest person",
+    "user_email": "guest@gmail.com"
+  },
+  {
+    "id": "ORD-009",
+    "customer_name": "GUest 5",
+    "items": [
+      {
+        "name": "Galon Aqua 19L Original",
+        "qty": 1
+      }
+    ],
+    "eta": "12.00",
+    "schedule": "12.00",
+    "status": "dalam_perjalanan",
+    "area": "Sarimanah",
+    "street": "Jalan Terusan Prof. Dr. Ir. Sutami",
+    "note": "",
+    "created_at": "2025-10-23T03:19:22.907525",
+    "user_name": "Guest person",
+    "user_email": "guest@gmail.com"
+  },
+  {
+    "id": "ORD-010",
+    "customer_name": "Argiiiii1",
+    "items": [
+      {
+        "name": "Galon Aqua 19L Original",
+        "qty": 1
+      }
+    ],
+    "eta": "18.00",
+    "schedule": "18.00",
+    "status": "dalam_perjalanan",
+    "area": "Sarimanah",
+    "street": "Jalan Terusan Sutami2",
+    "note": "",
+    "created_at": "2025-10-23T03:59:28.790213",
     "user_name": "argi kimang",
     "user_email": "argii@gmail.com"
   }
