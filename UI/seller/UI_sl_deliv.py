@@ -333,8 +333,6 @@ class DeliveryPreviewDialog(QDialog):
         label_jarak = "Jarak Tempuh Total: "
         label_waktu = "Estimasi Waktu Tempuh: "
 
-        reasons_str = self.desc_marker[0]
-
         # --- LOGIKA BARU: Cek apakah ada simulasi ---
         if self.marker_deleted:
             # Ada simulasi, coba hitung rute asli untuk perbandingan
@@ -349,6 +347,7 @@ class DeliveryPreviewDialog(QDialog):
                 original_length_km = None # Tidak bisa membandingkan jika G_original tidak ada
 
             if current_edges is None: # Rute alternatif TIDAK ditemukan
+                reasons_str = self.desc_marker[0]
                 analysis_str = (
                     f"Analisis:\n"
                     f"Rute normal dari '{start_name}' ke '{dest_name}' (jika ada) tidak dapat digunakan "
@@ -363,7 +362,7 @@ class DeliveryPreviewDialog(QDialog):
                 kecepatan_km_per_menit = 36 / 60
                 estimated_minutes_detour = current_length_km / kecepatan_km_per_menit
                 
-                
+                reasons_str = self.desc_marker[0]
                 analysis_str = (
                     f"Analisis:\n"
                     f"Rute terpendek normal adalah {original_length_km:.2f} km. "
@@ -379,6 +378,7 @@ class DeliveryPreviewDialog(QDialog):
                 kecepatan_km_per_menit = 36 / 60
                 estimated_minutes_detour = current_length_km / kecepatan_km_per_menit
                 
+                reasons_str = self.desc_marker[0]
                 analysis_str = (
                     f"Analisis:\n"
                     f"Jaringan sedang dalam simulasi {reasons_str}. "
