@@ -1,2 +1,6 @@
 Database/
-UI/seller/_pycache_
+UI/seller/__pycache__
+UI/login/__pycache__
+UI/customer/__pycache__
+logic/graph/__pycache__
+__pycache__

@@ -575,13 +575,14 @@ class DeliveryPreviewDialog(QDialog):
 
 
 class RoutePreviewDialog(QDialog):
-    def __init__(self, g: nx.Graph, path_nodes: list, start_name: str = "START", end_name: str = "FINISH", length_km: float | None = None, title: str = "Rute Tercepat", parent=None):
+    def __init__(self, g: nx.Graph, path_nodes: list, start_name: str = "START", end_name: str = "FINISH", length_km: float | None = None, title: str = "Rute Tercepat", customer_node_ids: list = None, parent=None):
         super().__init__(parent)
         self.G = g
         self.path_nodes = path_nodes
         self.start_name = start_name
         self.end_name = end_name
         self.length_km = length_km
+        self.customer_node_ids = customer_node_ids
         self.setWindowTitle("Rute Tercepat")
         self.resize(900, 650)
         layout = QVBoxLayout(self)
@@ -610,121 +611,87 @@ class RoutePreviewDialog(QDialog):
 
         self._draw_route()
 
-    # def _draw_route(self):
-    #     # Plot langsung ke axes dialog agar stabil
-    #     self.ax.clear()
-    #     ox.plot_graph_route(
-    #         self.G,
-    #         self.path_nodes,
-    #         route_color='red',
-    #         route_linewidth=4,
-    #         node_size=0,
-    #         bgcolor='#FFFFFF',
-    #         show=False,
-    #         close=False,
-    #         ax=self.ax
-    #     )
-    #     # Tambahkan label START/FINISH dan panah arah seperti di path_finder
-    #     try:
-    #         if self.path_nodes:
-    #             start_node = self.path_nodes[0]
-    #             end_node = self.path_nodes[-1]
-    #             start_x = self.G.nodes[start_node]['x']
-    #             start_y = self.G.nodes[start_node]['y']
-    #             end_x = self.G.nodes[end_node]['x']
-    #             end_y = self.G.nodes[end_node]['y']
-    #             # Label START
-    #             self.ax.text(
-    #                 start_x,
-    #                 start_y,
-    #                 f"  START\n  {self.start_name}",
-    #                 fontsize=9,
-    #                 color='white',
-    #                 bbox=dict(facecolor='green', alpha=0.8, boxstyle="round,pad=0.3")
-    #             )
-    #             # Label FINISH
-    #             self.ax.text(
-    #                 end_x,
-    #                 end_y,
-    #                 f"  FINISH\n  {self.end_name}",
-    #                 fontsize=9,
-    #                 color='white',
-    #                 bbox=dict(facecolor='darkred', alpha=0.8, boxstyle="round,pad=0.3")
-    #             )
-    #             # Panah menuju FINISH
-    #             if len(self.path_nodes) >= 2:
-    #                 second_last = self.path_nodes[-2]
-    #                 sl_x = self.G.nodes[second_last]['x']
-    #                 sl_y = self.G.nodes[second_last]['y']
-    #                 self.ax.annotate(
-    #                     "",
-    #                     xy=(end_x, end_y),
-    #                     xytext=(sl_x, sl_y),
-    #                     arrowprops=dict(arrowstyle="->", color="gold", linewidth=3, shrinkA=5, shrinkB=5)
-    #                 )
-    #         # Title
-    #         if self.length_km is not None:
-    #             self.ax.set_title(f"Rute Tercepat: {self.start_name} -> {self.end_name} ({self.length_km:.2f} km)")
-    #     except Exception:
-    #         pass
-    #     self.ax.set_aspect('equal')
-    #     self.canvas.draw()
-
     def _draw_route(self):
-        # Bersihkan kanvas
         self.ax.clear()
-        
-        # Konversi graf OSMnx ke GeoDataFrame
-        # hanya menerima satu variabel `edges_gdf`
-        edges_gdf = ox.graph_to_gdfs(self.G, nodes=False, edges=True)
-        
-        # Gambar semua jalan (latar belakang)
-        edges_gdf.plot(ax=self.ax, color='gray', linewidth=1, alpha=0.6)
-        
-        # Buat sub-graf rute dan gambar di atasnya
-        route_graph = self.G.subgraph(self.path_nodes)
-        # hanya menerima satu variabel `route_edges_gdf`
-        route_edges_gdf = ox.graph_to_gdfs(route_graph, nodes=False, edges=True)
-        
-        # Gambar sisi rute terpendek di atasnya dengan warna merah
-        if not route_edges_gdf.empty:
-            route_edges_gdf.plot(ax=self.ax, color='red', linewidth=3)
 
-        # Tambahkan label START/FINISH dan panah arah (logika ini sama seperti sebelumnya)
+        if not self.path_nodes:
+            self.ax.text(0.5, 0.5, "Rute tidak valid.", ha='center', va='center')
+            self.canvas.draw()
+            return
+
+        print(f"DEBUG: Graph stats before plotting: Nodes={self.G.number_of_nodes()}, Edges={self.G.number_of_edges()}")
+
         try:
-            if self.path_nodes:
-                start_node = self.path_nodes[0]
-                end_node = self.path_nodes[-1]
-                start_x, start_y = self.G.nodes[start_node]['x'], self.G.nodes[start_node]['y']
-                end_x, end_y = self.G.nodes[end_node]['x'], self.G.nodes[end_node]['y']
-                
-                # Label START
-                self.ax.text(
-                    start_x, start_y, f"  START\n  {self.start_name}", fontsize=9, color='white',
-                    bbox=dict(facecolor='green', alpha=0.8, boxstyle="round,pad=0.3")
-                )
-                # Label FINISH
-                self.ax.text(
-                    end_x, end_y, f"  FINISH\n  {self.end_name}", fontsize=9, color='white',
-                    bbox=dict(facecolor='darkred', alpha=0.8, boxstyle="round,pad=0.3")
-                )
-                # Panah menuju FINISH
-                if len(self.path_nodes) >= 2:
-                    second_last = self.path_nodes[-2]
-                    sl_x, sl_y = self.G.nodes[second_last]['x'], self.G.nodes[second_last]['y']
-                    self.ax.annotate(
-                        "", xy=(end_x, end_y), xytext=(sl_x, sl_y),
-                        arrowprops=dict(arrowstyle="->", color="gold", linewidth=3, shrinkA=15, shrinkB=15)
-                    )
-        except Exception as e:
-            print(f"Gagal menambahkan anotasi: {e}")
-            
-        # Atur tampilan akhir dan perbarui kanvas
-        self.ax.set_aspect('equal')
-        self.ax.axis('off')
-        self.fig.tight_layout(pad=0)
-        self.canvas.draw()
+            # --- STEP 1: Plot the base graph ONLY ---
+            # Use ox.plot_graph to draw all streets in light gray
+            print("DEBUG: Plotting base graph...")
+            ox.plot_graph(
+                self.G,
+                ax=self.ax,
+                node_size=0,           # Don't draw nodes here
+                edge_color='lightgray', # Color for all streets
+                edge_linewidth=0.8,     # Thickness for all streets
+                bgcolor='#FFFFFF',
+                show=False, close=False
+            )
+            print("DEBUG: Base graph plotted.")
 
+            # --- STEP 2: Plot the route ON TOP ---
+            # Use ox.plot_route_folium needs coords, let's use networkx draw
+            # Get coordinates for the route nodes
+            route_coords_x = [self.G.nodes[node_id]['x'] for node_id in self.path_nodes if node_id in self.G.nodes]
+            route_coords_y = [self.G.nodes[node_id]['y'] for node_id in self.path_nodes if node_id in self.G.nodes]
+
+            if len(route_coords_x) >= 2: # Need at least two points to draw a line
+                print("DEBUG: Plotting route line...")
+                # Draw the route line using Matplotlib's plot function
+                self.ax.plot(
+                    route_coords_x,
+                    route_coords_y,
+                    color='red',
+                    linewidth=3,
+                    solid_capstyle='round', # Nicer line endings
+                    zorder=3 # Ensure route is above base edges
+                )
+                print("DEBUG: Route line plotted.")
+            else:
+                print("DEBUG: Not enough valid nodes in path_nodes to draw route line.")
+
+
+            # --- STEP 3: Add Node Highlights (Scatter Plot - same as before) ---
+            print("DEBUG: Adding node highlights...")
+            start_node = self.path_nodes[0]; end_node = self.path_nodes[-1]
+            node_coords_x, node_coords_y, node_colors, node_sizes, node_markers = [], [], [], [], []
+            for node_id in self.path_nodes:
+                 if node_id not in self.G.nodes: continue
+                 is_customer = node_id in self.customer_node_ids; is_start = (node_id == start_node); is_end = (node_id == end_node)
+                 if is_start or is_end or is_customer:
+                     node_data = self.G.nodes[node_id]; node_coords_x.append(node_data['x']); node_coords_y.append(node_data['y'])
+                     if is_start: node_colors.append('limegreen'); node_sizes.append(150); node_markers.append('^')
+                     elif is_end: node_colors.append('red'); node_sizes.append(150); node_markers.append('v')
+                     else: node_colors.append('orange'); node_sizes.append(100); node_markers.append('o')
+
+            unique_markers = sorted(list(set(node_markers))); temp_x, temp_y, temp_c, temp_s = [], [], [], []
+            for marker_style in unique_markers:
+                temp_x.clear(); temp_y.clear(); temp_c.clear(); temp_s.clear()
+                for i in range(len(node_markers)):
+                     if node_markers[i] == marker_style: temp_x.append(node_coords_x[i]); temp_y.append(node_coords_y[i]); temp_c.append(node_colors[i]); temp_s.append(node_sizes[i])
+                if temp_x:
+                    self.ax.scatter(temp_x, temp_y, c=temp_c, s=temp_s, marker=marker_style, edgecolor='black', linewidth=0.5, zorder=5) # zorder=5 ensures highlights are on top
+            print("DEBUG: Node highlights added.")
+
+            # --- Final Plot Adjustments ---
+            self.ax.set_aspect('equal')
+            self.ax.set_xticks([]); self.ax.set_yticks([])
+            self.ax.spines['top'].set_visible(False); self.ax.spines['right'].set_visible(False); self.ax.spines['bottom'].set_visible(False); self.ax.spines['left'].set_visible(False)
+            self.canvas.draw()
+            print("DEBUG: Canvas drawn.")
+
+        except Exception as e:
+            print(f"ERROR during plotting: {e}")
+            self.ax.text(0.5, 0.5, f"Error plotting map:\n{e}", ha='center', va='center', color='red')
+            self.canvas.draw()
+            
 
 class NodeTimelineDialog(QDialog):
     def __init__(self, gdf_lokasi: gpd.GeoDataFrame, G, path_nodes: list, title: str = "Timeline Dijkstra", parent=None):

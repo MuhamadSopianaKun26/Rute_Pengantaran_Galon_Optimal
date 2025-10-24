@@ -12,7 +12,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "sari rasa",
-    "street": "Jl. Sari Rasa 1",
+    "street": "Jalan Sarirasa 1",
     "note": "12345",
     "created_at": "2025-10-20T19:29:10.189631",
     "user_name": "argi kimang",
@@ -131,21 +131,20 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama1",
+    "street": "Simpang Tanpa Nama1",
     "note": ""
   },
   {
     "id": "ORD-102",
     "customer_name": "Bu Rina",
     "items": [
-      { "name": "Galon Le-Mineral 19L", "qty": 3 },
-      { "name": "Tutup Galon", "qty": 2 }
+      { "name": "Galon Le-Mineral 19L", "qty": 3 }
     ],
     "eta": "-",
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama2",
+    "street": "Simpang Tanpa Nama2",
     "note": ""
   },
   {
@@ -158,7 +157,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama3",
+    "street": "Simpang Tanpa Nama3",
     "note": ""
   },
   {
@@ -171,7 +170,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama4",
+    "street": "Simpang Tanpa Nama4",
     "note": ""
   },
 
@@ -186,7 +185,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama5",
+    "street": "Simpang Tanpa Nama5",
     "note": ""
   },
   {
@@ -200,7 +199,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama6",
+    "street": "Simpang Tanpa Nama6",
     "note": ""
   },
   {
@@ -214,7 +213,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama7",
+    "street": "Simpang Tanpa Nama7",
     "note": ""
   },
   {
@@ -228,7 +227,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama8",
+    "street": "Simpang Tanpa Nama8",
     "note": ""
   },
   {
@@ -242,7 +241,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama9",
+    "street": "Simpang Tanpa Nama9",
     "note": ""
   },
   {
@@ -256,7 +255,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama10",
+    "street": "Simpang Tanpa Nama10",
     "note": ""
   },
   {
@@ -270,7 +269,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama11",
+    "street": "Simpang Tanpa Nama11",
     "note": ""
   },
   {
@@ -283,7 +282,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama12",
+    "street": "Simpang Tanpa Nama12",
     "note": ""
   },
   {
@@ -296,7 +295,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama13",
+    "street": "Simpang Tanpa Nama13",
     "note": ""
   },
   {
@@ -309,7 +308,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama14",
+    "street": "Simpang Tanpa Nama14",
     "note": ""
   },
   {
@@ -322,7 +321,7 @@
     "schedule": "Segera",
     "status": "sedang_disiapkan",
     "area": "Ciwaruga",
-    "street": "Jalan Tanpa Nama15",
+    "street": "Simpang Tanpa Nama15",
     "note": ""
   }
 ]

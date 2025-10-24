@@ -147,79 +147,180 @@ def cari_rute_by_nama(G, gdf_lokasi, nama_awal, nama_akhir, show_preview: bool =
 # BAGIAN KONFIRMASI DJIKSTRA SAAT MENGEKSEKUSI PEMESANAN
 # =============================================================================
 
-def buat_visualisasi_timeline_dijkstra(G_peta, gdf_lokasi, path_nodes):
+import networkx as nx
+import matplotlib.pyplot as plt
+import textwrap
+import geopandas as gpd
+
+# Asumsi textwrap sudah diimpor di file asli Anda
+
+def buat_visualisasi_timeline_dijkstra(
+    G_peta: nx.Graph,
+    gdf_lokasi: gpd.GeoDataFrame, # Tipe data diasumsikan GeoDataFrame
+    path_nodes: list,
+    # --- PARAMETER BARU ---
+    customer_destination_ids: list
+):
     """
-    Membuat visualisasi rute Dijkstra dalam bentuk timeline zig-zag yang fleksibel.
-    SEKARANG DENGAN LABEL BOBOT (JARAK) PADA SETIAP SISI.
-    
+    Membuat visualisasi rute Dijkstra dalam bentuk timeline zig-zag.
+    SEKARANG DENGAN HIGHLIGHT UNTUK NODE PELANGGAN dan label bobot.
+
     Args:
         G_peta (nx.Graph): Objek graf peta ASLI dari OSMnx, berisi data bobot.
-        gdf_lokasi (gpd.GeoDataFrame): Tabel data lokasi dari GeoJSON.
-        path_nodes (list): Daftar ID simpul dari rute Dijkstra.
+        gdf_lokasi (gpd.GeoDataFrame): Tabel data lokasi dari GeoJSON (harus ada kolom 'osmid' dan 'intersection_name').
+        path_nodes (list): Daftar ID simpul (OSM ID) dari rute Dijkstra (urutan penting!).
+        customer_destination_ids (list): Daftar ID simpul (OSM ID) yang merupakan titik tujuan pelanggan.
     """
-    print("Membuat visualisasi timeline rute yang fleksibel...")
-    
+    print("Membuat visualisasi timeline rute DENGAN HIGHLIGHT PELANGGAN...")
+
+    if not path_nodes:
+        print("Peringatan: path_nodes kosong, tidak ada yang bisa divisualisasikan.")
+        return
+
     # --- Langkah 1: Siapkan Informasi Label Simpul ---
-    nama_simpul_map = gdf_lokasi.set_index('osmid')['intersection_name'].to_dict()
+    nama_simpul_map = {}
+    if gdf_lokasi is not None and not gdf_lokasi.empty:
+        try:
+            # Pastikan 'osmid' adalah index untuk pencarian cepat
+            if gdf_lokasi.index.name != 'osmid':
+                gdf_lokasi_indexed = gdf_lokasi.set_index('osmid')
+            else:
+                gdf_lokasi_indexed = gdf_lokasi
+            nama_simpul_map = gdf_lokasi_indexed['intersection_name'].to_dict()
+        except KeyError:
+            print("Peringatan: Kolom 'osmid' atau 'intersection_name' tidak ditemukan di gdf_lokasi.")
+        except Exception as e:
+            print(f"Error saat membuat nama_simpul_map: {e}")
+
     node_labels = {}
     for node_id in path_nodes:
-        nama = nama_simpul_map.get(node_id, str(node_id))
-        node_labels[node_id] = textwrap.fill(nama, width=20)
+        # Fallback ke ID jika nama tidak ditemukan
+        nama = nama_simpul_map.get(node_id, f"ID:{node_id}")
+        # Gunakan textwrap untuk membatasi lebar label
+        node_labels[node_id] = textwrap.fill(str(nama), width=18) # Lebar sedikit diperkecil
 
     # --- Langkah 2: Buat Layout Zig-Zag ---
     pos = {}
-    # (Logika layout zig-zag tetap sama)
-    nodes_per_row = 5
+    nodes_per_row = 5 # Bisa disesuaikan
     x, y = 0, 0
     direction = 1
+    max_x = 0 # Lacak x maksimum untuk lebar figure
     for i, node_id in enumerate(path_nodes):
         pos[node_id] = (x, y)
+        max_x = max(max_x, abs(x))
         if (i + 1) % nodes_per_row == 0 and i < len(path_nodes) - 1:
-            y -= 2
-            direction *= -1
+            y -= 2.5 # Jarak vertikal antar baris
+            direction *= -1 # Balik arah horizontal
         else:
-            x += direction
+            x += direction * 1.5 # Jarak horizontal antar node
 
-    # --- (BARU) Langkah 3: Siapkan Label Bobot Sisi ---
+    # --- Langkah 3: Siapkan Label Bobot Sisi ---
     edge_labels = {}
     for i in range(len(path_nodes) - 1):
         u, v = path_nodes[i], path_nodes[i+1]
-        # Ambil data sisi dari graf peta ASLI (G_peta)
-        panjang_meter = G_peta.get_edge_data(u, v)[0]['length']
-        # Format ke km dengan 2 angka desimal
-        panjang_km = f"{panjang_meter / 1000:.2f} km"
-        edge_labels[(u, v)] = panjang_km
+        try:
+            # Ambil data sisi dari graf peta ASLI (G_peta)
+            # Akses edge data bisa memerlukan key jika MultiGraph, default ke 0
+            edge_data = G_peta.get_edge_data(u, v)
+            if edge_data:
+                 # Ambil data dari key pertama (biasanya 0 untuk graf sederhana atau MultiGraph dari OSMnx)
+                panjang_meter = edge_data.get(0, {}).get('length')
+                if panjang_meter is not None:
+                    # Format ke km dengan 1 angka desimal agar tidak terlalu ramai
+                    panjang_km = f"{panjang_meter / 1000:.1f} km"
+                    edge_labels[(u, v)] = panjang_km
+                else:
+                    print(f"Peringatan: Edge ({u},{v}) tidak punya atribut 'length'.")
+            else:
+                 print(f"Peringatan: Edge ({u},{v}) tidak ditemukan di G_peta.")
+        except Exception as e:
+            print(f"Error saat mengambil data edge ({u},{v}): {e}")
 
-    # --- Langkah 4: Buat Graf Rute dan Gambar ---
-    G_rute = nx.path_graph(path_nodes)
-    
-    num_rows = (len(path_nodes) - 1) // nodes_per_row + 1
-    fig, ax = plt.subplots(figsize=(12, num_rows * 3))
+    # --- Langkah 4: Buat Graf Rute dan Siapkan Warna Node ---
+    G_rute = nx.path_graph(path_nodes) # Graf lurus untuk visualisasi timeline
 
-    # Gambar simpul
-    nx.draw_networkx_nodes(G_rute, pos, ax=ax, node_color='skyblue', node_size=1500)
-    
-    # Gambar sisi
-    nx.draw_networkx_edges(G_rute, pos, ax=ax, width=2.0, edge_color='black', arrows=True, arrowsize=20, arrowstyle='-|>')
-    
-    # (BARU) Gambar label bobot pada sisi
+    # Definisikan warna
+    start_color = 'limegreen'    # Warna untuk titik awal (Depot)
+    end_color = 'red'          # Warna untuk titik akhir (Pelanggan terakhir di rute ini)
+    customer_color = 'orange'  # Warna untuk titik pelanggan perantara
+    intersection_color = 'skyblue' # Warna untuk persimpangan biasa
+
+    node_colors = []
+    # Gunakan set untuk pencarian cepat ID pelanggan
+    customer_set = set(customer_destination_ids)
+
+    for i, node_id in enumerate(path_nodes):
+        if i == 0:
+            node_colors.append(start_color)                 # Node pertama = Start
+        elif node_id in customer_set:
+             # Cek apakah ini pelanggan *terakhir* di path ini
+             if i == len(path_nodes) - 1:
+                 node_colors.append(end_color)            # Pelanggan terakhir = End
+             else:
+                 node_colors.append(customer_color)       # Pelanggan perantara
+        # elif i == len(path_nodes) - 1: # Jika titik akhir BUKAN pelanggan (jarang terjadi jika rute benar)
+        #     node_colors.append(end_color) # Tetap tandai sebagai akhir
+        else:
+            node_colors.append(intersection_color)          # Node perantara biasa
+
+    # --- Langkah 5: Gambar Graf ---
+    # Hitung ukuran figure berdasarkan jumlah baris dan lebar layout
+    num_rows = abs(min(p[1] for p in pos.values())) // 2.5 + 1
+    fig_width = max(10, max_x * 1.8) # Sesuaikan lebar berdasarkan layout x
+    fig_height = max(5, num_rows * 2.5) # Sesuaikan tinggi
+
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+
+    # Gambar simpul (node) dengan warna yang sudah ditentukan
+    nx.draw_networkx_nodes(
+        G_rute, pos, ax=ax,
+        node_color=node_colors, # Gunakan daftar warna
+        node_size=1200,         # Ukuran node bisa disesuaikan
+        edgecolors='black',     # Tambahkan outline hitam
+        linewidths=1.0
+    )
+
+    # Gambar sisi (edge)
+    nx.draw_networkx_edges(
+        G_rute, pos, ax=ax,
+        width=2.5,              # Tebalkan garis
+        edge_color='dimgray',
+        arrows=True,
+        arrowsize=25,           # Perbesar panah
+        arrowstyle='-|>'        # Gaya panah
+    )
+
+    # Gambar label bobot pada sisi (edge labels)
     nx.draw_networkx_edge_labels(
         G_rute, pos,
         edge_labels=edge_labels,
-        font_color='red',
-        font_size=8,
-        ax=ax
+        font_color='darkred',   # Warna label jarak
+        font_size=7,            # Ukuran font label jarak
+        ax=ax,
+        bbox=dict(facecolor='white', alpha=0.5, edgecolor='none', boxstyle='round,pad=0.2') # Background agar terbaca
     )
-    
+
     # Gambar label nama di bawah simpul
+    label_y_offset = 0.6 # Jarak vertikal label nama dari node
     for i, node_id in enumerate(path_nodes):
         x_coord, y_coord = pos[node_id]
-        label_text = f"{i+1}\n{node_labels[node_id]}"
-        ax.text(x_coord, y_coord - 0.5, label_text, ha='center', va='top', fontsize=8)
+        # Label: Nomor urut + Nama Node
+        label_text = f"#{i}\n{node_labels[node_id]}"
+        # Tentukan warna teks label berdasarkan jenis node
+        text_color = 'black'
+        if i==0: text_color='darkgreen'
+        elif node_id in customer_set: text_color='darkorange'
+        elif i == len(path_nodes) -1 : text_color = 'darkred'
 
-    ax.axis('off')
-    ax.set_title("Konfirmasi Rute Pengantaran (Timeline Perjalanan)", fontsize=14, pad=15)
-    plt.tight_layout()
+        ax.text(
+            x_coord, y_coord - label_y_offset, label_text,
+            ha='center', va='top', fontsize=7, color=text_color, weight='bold', # Ukuran font nama
+             bbox=dict(facecolor='white', alpha=0.6, edgecolor='none', boxstyle='round,pad=0.2') # Background
+        )
+
+    ax.axis('off') # Sembunyikan sumbu X dan Y
+    ax.set_title("Timeline Rute Pengantaran", fontsize=16, pad=20, weight='bold')
+    plt.tight_layout(pad=1.5) # Beri sedikit padding
     plt.show()
 
 # =============================================================================
